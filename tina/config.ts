@@ -3,9 +3,6 @@ import { defineConfig } from "tinacms";
 // Your hosting provider likely exposes this as an environment variable
 const branch = "main";
 
-console.log("Tina Configuration Branch:", branch);
-console.log("Tina Configuration Client ID:", "d686d883-f701-4077-b919-9d21b99bbbf6");
-
 export default defineConfig({
   branch,
 

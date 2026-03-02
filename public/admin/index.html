@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Min-Note 管理画面</title>
+  </head>
+  <body>
+    <!-- Sveltia CMS (Decap CMSのモダン/サーバーレス版。GitHub PATにネイティブ対応) -->
+    <script src="https://unpkg.com/@sveltia/cms/dist/sveltia-cms.js"></script>
+
+    <script>
+      // 1. YouTube埋め込み用のカスタム部品
+      CMS.registerEditorComponent({
+        id: "youtube",
+        label: "📺 YouTube 埋め込み",
+        fields: [{name: 'id', label: 'YouTube動画ID (例：v=dQw4w9WgXcQ なら dQw4w9WgXcQ)', widget: 'string'}],
+        pattern: /^<div class="youtube-wrapper"><iframe src="https:\/\/www\.youtube\.com\/embed\/(.*?)" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen><\/iframe><\/div>$/,
+        fromBlock: function(match) {
+          return { id: match[1] };
+        },
+        toBlock: function(obj) {
+          return '<div class="youtube-wrapper"><iframe src="https://www.youtube.com/embed/' + obj.id + '" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>';
+        },
+        toPreview: function(obj) {
+          return '<div style="background:#ddd; padding:20px; text-align:center;">YouTube動画プレビュー枠: ' + obj.id + '</div>';
+        }
+      });
+
+      // 2. 自前アップロードしたMP4動画の埋め込み用カスタム部品
+      CMS.registerEditorComponent({
+        id: "video",
+        label: "🎬 動画アップロード (MP4等)",
+        fields: [{name: 'url', label: '動画を選択・アップロードしてください', widget: 'file'}],
+        pattern: /^<video controls src="(.*?)" style="max-width: 100%; border-radius: 8px; margin: 1em 0;"><\/video>$/,
+        fromBlock: function(match) {
+          return { url: match[1] };
+        },
+        toBlock: function(obj) {
+          return '<video controls src="' + obj.url + '" style="max-width: 100%; border-radius: 8px; margin: 1em 0;"></video>';
+        },
+        toPreview: function(obj) {
+          return '<video controls src="' + obj.url + '" style="max-width: 100%; border-radius: 8px; margin: 1em 0;"></video>';
+        }
+      });
+    </script>
+  </body>
+</html>

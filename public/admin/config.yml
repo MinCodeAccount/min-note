@@ -1,0 +1,26 @@
+backend:
+  name: github
+  repo: MinCodeAccount/min-note
+  branch: main
+  # 外部サーバーを使わず、ブラウザ上で直接GitHubと通信します。
+
+media_folder: "public/assets"
+public_folder: "/assets"
+
+collections:
+  - name: "blog"
+    label: "ブログ記事 (Blog Posts)"
+    folder: "src/content/blog"
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    extension: "md"
+    format: "frontmatter"
+    editor:
+      preview: true
+    fields:
+      - { label: "タイトル", name: "title", widget: "string" }
+      - { label: "説明 (Description)", name: "description", widget: "text" }
+      - { label: "公開日", name: "pubDate", widget: "datetime", date_format: "YYYY-MM-DD", time_format: "HH:mm:ss.SSS[Z]", picker_utc: true }
+      - { label: "ヒーロー画像", name: "heroImage", widget: "image", required: false }
+      - { label: "カテゴリ", name: "category", widget: "select", options: ["anime", "investment", "daily"], default: "daily" }
+      - { label: "本文", name: "body", widget: "markdown" }

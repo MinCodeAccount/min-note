@@ -36,7 +36,7 @@ const categoryNames: Record<string, string> = {
 	investment: '📈 投資',
 	daily: '☕ 日常'
 };
-const categoryTitle = categoryNames[category] || category;
+const categoryTitle = (category && categoryNames[category]) || category;
 ---
 
 <!doctype html>

@@ -9,6 +9,12 @@ import { getCollection } from 'astro:content';
 const posts = (await getCollection('blog')).sort(
 	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
 ).slice(0, 3);
+
+const resolveImage = (imagePath: string | undefined) => {
+	if (!imagePath) return undefined;
+	const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+	return imagePath.startsWith('/') ? `${base}${imagePath}` : `${base}/${imagePath}`;
+};
 ---
 
 <!doctype html>
@@ -223,7 +229,7 @@ const posts = (await getCollection('blog')).sort(
 							<li>
 								<a href={`${import.meta.env.BASE_URL}/blog/${post.id}/`}>
 									{post.data.heroImage ? (
-										<img class="post-thumbnail" src={post.data.heroImage} alt="" />
+										<img class="post-thumbnail" src={resolveImage(post.data.heroImage)} alt="" />
 									) : (
 										<div class="post-thumbnail" style="background:#eee;"></div>
 									)}

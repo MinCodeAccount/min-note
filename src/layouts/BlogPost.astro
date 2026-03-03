@@ -10,16 +10,15 @@ type Props = CollectionEntry<'blog'>['data'];
 
 const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 
-const base = import.meta.env.BASE_URL;
-// Remove the leading slash if it exists to avoid double slashes, then prepend the base path
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const heroImageSrc = typeof heroImage === 'string' 
-  ? (heroImage.startsWith('/') ? `${base}${heroImage.slice(1)}` : `${base}${heroImage}`)
+  ? (heroImage.startsWith('/') ? `${base}${heroImage}` : `${base}/${heroImage}`)
   : undefined;
 ---
 
 <html lang="en">
 	<head>
-		<BaseHead title={title} description={description} />
+		<BaseHead title={title} description={description} image={heroImageSrc} />
 		<style>
 			main {
 				width: calc(100% - 2em);

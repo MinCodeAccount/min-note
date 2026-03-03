@@ -47,13 +47,21 @@
       CMS.registerEditorComponent({
         id: "twitter",
         label: "🐦 Twitter (X) 埋め込み",
-        fields: [{name: 'url', label: 'ツイートのURL（例：https://x.com/.../status/123456789）', widget: 'string'}],
-        pattern: /<blockquote class="twitter-tweet"><a href="(.*?)"><\/a><\/blockquote>/,
+        fields: [{name: 'url', label: 'ツイートのURL (またはTwitter公式の「埋め込み」HTMLコード全体)', widget: 'string'}],
+        pattern: /<blockquote class="twitter-tweet".*?<a href="(.*?)">.*?<\/blockquote>|<blockquote class="twitter-tweet"><a href="(.*?)"><\/a><\/blockquote>/s,
         fromBlock: function(match) {
-          return { url: match[1] };
+          // Twitter HTMLブロック全体が貼られた場合は match[1]、単なるURLを元に再生成されたものは match[2]
+          return { url: match[1] || match[2] };
         },
         toBlock: function(obj) {
-          return '<blockquote class="twitter-tweet"><a href="' + obj.url + '"></a></blockquote>';
+          // ユーザーがHTML全体を貼った場合でも、内部的にキレイな標準形式に整形して保存
+          let cleanUrl = obj.url;
+          // もし入力欄全体にHTMLが貼られた場合は、そこからURLだけを抽出する安全処理
+          if (cleanUrl && cleanUrl.includes('twitter.com') && cleanUrl.includes('<blockquote')) {
+              const urlMatch = cleanUrl.match(/href="(https:\/\/(?:twitter|x)\.com\/.*?\/status\/.*?)(?:\?.*?)?"/);
+              if (urlMatch) cleanUrl = urlMatch[1];
+          }
+          return '<blockquote class="twitter-tweet"><a href="' + cleanUrl + '"></a></blockquote>';
         },
         toPreview: function(obj) {
           return '<div style="background:#ddd; padding:20px; text-align:center;">Twitter (X) プレビュー枠: ' + obj.url + '</div>';

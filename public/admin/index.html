@@ -14,16 +14,37 @@
       CMS.registerEditorComponent({
         id: "youtube",
         label: "📺 YouTube 埋め込み",
-        fields: [{name: 'id', label: 'YouTube動画ID (例：v=dQw4w9WgXcQ なら dQw4w9WgXcQ)', widget: 'string'}],
+        fields: [{name: 'id', label: 'YouTube動画 (URL、埋め込みタグ全体、または動画ID)', widget: 'string'}],
         pattern: /^<div class="youtube-wrapper"><iframe src="https:\/\/www\.youtube\.com\/embed\/(.*?)" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen><\/iframe><\/div>$/,
         fromBlock: function(match) {
           return { id: match[1] };
         },
         toBlock: function(obj) {
-          return '<div class="youtube-wrapper"><iframe src="https://www.youtube.com/embed/' + obj.id + '" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>';
+          let videoId = obj.id || '';
+          
+          // ユーザーがiframe全体を貼り付けた場合
+          if (videoId.includes('<iframe') && videoId.includes('src=')) {
+              const srcMatch = videoId.match(/src="[^"]*?(?:embed\/|v=)([^"&?]+)/);
+              if (srcMatch) videoId = srcMatch[1];
+          } 
+          // ユーザーがURLを貼り付けた場合 (watch?v=... や youtu.be/...)
+          else if (videoId.includes('youtube.com') || videoId.includes('youtu.be')) {
+              const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+              const match = videoId.match(regExp);
+              if (match && match[2].length === 11) {
+                  videoId = match[2];
+              }
+          }
+          
+          // 万が一余計な文字列が紛れ込んだ場合、最初の11文字(YouTube IDの標準長)だけを切り出す安全処理
+          if (videoId.length > 11 && !videoId.includes('<')) {
+              videoId = videoId.substring(0, 11);
+          }
+
+          return '<div class="youtube-wrapper"><iframe src="https://www.youtube.com/embed/' + videoId + '" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>';
         },
         toPreview: function(obj) {
-          return '<div style="background:#ddd; padding:20px; text-align:center;">YouTube動画プレビュー枠: ' + obj.id + '</div>';
+          return '<div style="background:#ddd; padding:20px; text-align:center;">YouTube動画プレビュー枠: ' + (obj.id || '') + '</div>';
         }
       });
 

@@ -67,6 +67,22 @@
           return '<div style="background:#ddd; padding:20px; text-align:center;">Twitter (X) プレビュー枠: ' + obj.url + '</div>';
         }
       });
+      // 4. 日経電子版 (Nikkei) 記事埋め込み用のカスタム部品
+      CMS.registerEditorComponent({
+        id: "nikkei",
+        label: "📰 日経電子版 埋め込み",
+        fields: [{name: 'html', label: '日経電子版の「記事を埋め込む」で取得したコード全体 (<iframe>...</iframe>)', widget: 'string'}],
+        pattern: /<iframe src="https:\/\/www\.nikkei\.com\/.*?<\/iframe>/,
+        fromBlock: function(match) {
+          return { html: match[0] };
+        },
+        toBlock: function(obj) {
+          return obj.html;
+        },
+        toPreview: function(obj) {
+          return '<div style="background:#f5f5f5; border:1px solid #ccc; padding:20px; text-align:center;">📰 日経電子版 プレビュー</div>';
+        }
+      });
     </script>
   </body>
 </html>

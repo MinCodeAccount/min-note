@@ -43,6 +43,22 @@
           return '<video controls src="' + obj.url + '" style="max-width: 100%; border-radius: 8px; margin: 1em 0;"></video>';
         }
       });
+      // 3. Twitter (X) 埋め込み用のカスタム部品
+      CMS.registerEditorComponent({
+        id: "twitter",
+        label: "🐦 Twitter (X) 埋め込み",
+        fields: [{name: 'url', label: 'ツイートのURL（例：https://x.com/.../status/123456789）', widget: 'string'}],
+        pattern: /<blockquote class="twitter-tweet"><a href="(.*?)"><\/a><\/blockquote>/,
+        fromBlock: function(match) {
+          return { url: match[1] };
+        },
+        toBlock: function(obj) {
+          return '<blockquote class="twitter-tweet"><a href="' + obj.url + '"></a></blockquote>';
+        },
+        toPreview: function(obj) {
+          return '<div style="background:#ddd; padding:20px; text-align:center;">Twitter (X) プレビュー枠: ' + obj.url + '</div>';
+        }
+      });
     </script>
   </body>
 </html>

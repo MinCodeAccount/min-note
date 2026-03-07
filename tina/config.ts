@@ -86,6 +86,7 @@ export default defineConfig({
               { label: "📺 アニメ (Anime)", value: "anime" },
               { label: "📈 投資 (Investment)", value: "investment" },
               { label: "☕ 日常 (Daily)", value: "daily" },
+              { label: "🎮 ゲーム (Game)", value: "game" },
             ]
           },
           {

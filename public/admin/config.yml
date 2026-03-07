@@ -22,5 +22,5 @@ collections:
       - { label: "説明 (Description)", name: "description", widget: "text" }
       - { label: "公開日", name: "pubDate", widget: "datetime", date_format: "YYYY-MM-DD", time_format: "HH:mm:ss.SSS[Z]", picker_utc: true }
       - { label: "ヒーロー画像", name: "heroImage", widget: "image", required: false }
-      - { label: "カテゴリ", name: "category", widget: "select", options: ["anime", "investment", "daily"], default: "daily" }
+      - { label: "カテゴリ", name: "category", widget: "select", options: ["anime", "investment", "daily", "game"], default: "daily" }
       - { label: "本文", name: "body", widget: "markdown" }

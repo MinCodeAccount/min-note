@@ -15,6 +15,7 @@ const recentPosts = posts.slice(0, 3);
 const animePosts = posts.filter(post => post.data.category === 'anime').slice(0, 3);
 const investmentPosts = posts.filter(post => post.data.category === 'investment').slice(0, 3);
 const dailyPosts = posts.filter(post => post.data.category === 'daily').slice(0, 3);
+const gamePosts = posts.filter(post => post.data.category === 'game').slice(0, 3);
 
 const resolveImage = (imagePath: string | undefined) => {
 	if (!imagePath) return undefined;
@@ -60,6 +61,7 @@ const resolveImage = (imagePath: string | undefined) => {
 			.category-section.anime { border-color: #bdf1f6; }
 			.category-section.investment { border-color: #fff3b0; }
 			.category-section.daily { border-color: #ffc6c7; }
+			.category-section.game { border-color: #a0fca5; }
 			
 			.section-title {
 				display: flex;
@@ -249,6 +251,34 @@ const resolveImage = (imagePath: string | undefined) => {
 				</div>
 				<ul class="post-list">
 					{dailyPosts.map((post) => (
+						<li>
+							<a href={`${import.meta.env.BASE_URL}/blog/${post.id}/`}>
+								{post.data.heroImage ? (
+									<img class="post-thumbnail" src={resolveImage(post.data.heroImage)} alt="" />
+								) : (
+									<div class="post-thumbnail" style="background:#eee;"></div>
+								)}
+								<div class="post-content">
+									<span class="post-title">{post.data.title}</span>
+									<span class="post-date">
+										<FormattedDate date={post.data.pubDate} />
+									</span>
+								</div>
+							</a>
+						</li>
+					))}
+				</ul>
+			</section>
+			)}
+
+			{gamePosts.length > 0 && (
+			<section class="category-section game">
+				<div class="section-title">
+					<h2>🎮 ゲーム</h2>
+					<a href={`${import.meta.env.BASE_URL}/category/game`}>もっと見る ❯</a>
+				</div>
+				<ul class="post-list">
+					{gamePosts.map((post) => (
 						<li>
 							<a href={`${import.meta.env.BASE_URL}/blog/${post.id}/`}>
 								{post.data.heroImage ? (

@@ -1,0 +1,19 @@
+[2m08:53:05[22m [34m[content][39m Syncing content
+[2m08:53:05[22m [34m[content][39m Synced content
+[2m08:53:05[22m [34m[types][39m Generated [2m361ms[22m
+[2m08:53:05[22m [34m[build][39m output: [34m"static"[39m
+[2m08:53:05[22m [34m[build][39m mode: [34m"static"[39m
+[2m08:53:05[22m [34m[build][39m directory: [34mC:\Users\zakam\Desktop\src\git\astro\dist\[39m
+[2m08:53:05[22m [34m[build][39m Collecting build info...
+[2m08:53:05[22m [34m[build][39m [32m✓ Completed in 377ms.[39m
+[2m08:53:05[22m [34m[build][39m Building static entrypoints...
+[33m[1m08:53:05[22m [WARN] [vite][39m 
+/min-note/fonts/atkinson-regular.woff referenced in /min-note/fonts/atkinson-regular.woff didn't resolve at build time, it will remain unchanged to be resolved at runtime
+[33m[1m08:53:05[22m [WARN] [vite][39m 
+/min-note/fonts/atkinson-bold.woff referenced in /min-note/fonts/atkinson-bold.woff didn't resolve at build time, it will remain unchanged to be resolved at runtime
+[31m[1m08:53:05[22m [ERROR] [vite][39m [31m✗[39m Build failed in 432ms
+Could not resolve "../assets/anime/tensura_movie_グッズアクリル.JPG" from "src/components/BaseHead.astro"
+file: C:/Users/zakam/Desktop/src/git/astro/src/components/BaseHead.astro
+  [1mStack trace:[22m
+[2m    at getRollupError (file:///C:/Users/zakam/Desktop/src/git/astro/node_modules/rollup/dist/es/shared/parseAst.js:402:41)
+    at ModuleLoader.handleInvalidResolvedId (file:///C:/Users/zakam/Desktop/src/git/astro/node_modules/rollup/dist/es/shared/node-entry.js:21710:24)[22m

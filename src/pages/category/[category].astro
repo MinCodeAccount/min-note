@@ -9,7 +9,7 @@ import { SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
 
 export async function getStaticPaths() {
 	const posts = await getCollection('blog');
-	const predefinedCategories = ['anime', 'investment', 'daily'];
+	const predefinedCategories = ['anime', 'investment', 'daily', 'game'];
 	const uniqueCategories = [
 		...new Set([
 			...predefinedCategories,
@@ -34,7 +34,8 @@ posts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 const categoryNames: Record<string, string> = {
 	anime: '📺 アニメ',
 	investment: '📈 投資',
-	daily: '☕ 日常'
+	daily: '☕ 日常',
+	game: '🎮 ゲーム'
 };
 const categoryTitle = (category && categoryNames[category]) || category;
 

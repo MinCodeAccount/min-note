@@ -1,4 +1,4 @@
----
+﻿---
 import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
 import BaseHead from '../components/BaseHead.astro';
@@ -12,7 +12,7 @@ type Props = CollectionEntry<'blog'>['data'] & { headings?: MarkdownHeading[] };
 
 const { title, description, pubDate, updatedDate, heroImage, headings = [] } = Astro.props;
 
-const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const base = '';
 const heroImageSrc = typeof heroImage === 'string' 
   ? (heroImage.startsWith('/') ? `${base}${heroImage}` : `${base}/${heroImage}`)
   : undefined;

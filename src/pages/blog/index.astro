@@ -1,4 +1,4 @@
----
+﻿---
 import { Image } from 'astro:assets';
 import { getCollection } from 'astro:content';
 import BaseHead from '../../components/BaseHead.astro';
@@ -19,7 +19,7 @@ const gamePosts = posts.filter(post => post.data.category === 'game').slice(0, 3
 
 const resolveImage = (imagePath: string | undefined) => {
 	if (!imagePath) return undefined;
-	const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+	const base = '';
 	return imagePath.startsWith('/') ? `${base}${imagePath}` : `${base}/${imagePath}`;
 };
 ---
@@ -169,7 +169,7 @@ const resolveImage = (imagePath: string | undefined) => {
 				<ul class="post-list">
 					{recentPosts.map((post) => (
 						<li>
-							<a href={`${import.meta.env.BASE_URL}/blog/${post.id}/`}>
+							<a href={`/blog/${post.id}/`}>
 								{post.data.heroImage ? (
 									<img class="post-thumbnail" src={resolveImage(post.data.heroImage)} alt="" />
 								) : (
@@ -191,12 +191,12 @@ const resolveImage = (imagePath: string | undefined) => {
 			<section class="category-section anime">
 				<div class="section-title">
 					<h2>📺 アニメ</h2>
-					<a href={`${import.meta.env.BASE_URL}/category/anime`}>もっと見る ❯</a>
+					<a href={`/category/anime`}>もっと見る ❯</a>
 				</div>
 				<ul class="post-list">
 					{animePosts.map((post) => (
 						<li>
-							<a href={`${import.meta.env.BASE_URL}/blog/${post.id}/`}>
+							<a href={`/blog/${post.id}/`}>
 								{post.data.heroImage ? (
 									<img class="post-thumbnail" src={resolveImage(post.data.heroImage)} alt="" />
 								) : (
@@ -219,12 +219,12 @@ const resolveImage = (imagePath: string | undefined) => {
 			<section class="category-section investment">
 				<div class="section-title">
 					<h2>📈 投資</h2>
-					<a href={`${import.meta.env.BASE_URL}/category/investment`}>もっと見る ❯</a>
+					<a href={`/category/investment`}>もっと見る ❯</a>
 				</div>
 				<ul class="post-list">
 					{investmentPosts.map((post) => (
 						<li>
-							<a href={`${import.meta.env.BASE_URL}/blog/${post.id}/`}>
+							<a href={`/blog/${post.id}/`}>
 								{post.data.heroImage ? (
 									<img class="post-thumbnail" src={resolveImage(post.data.heroImage)} alt="" />
 								) : (
@@ -247,12 +247,12 @@ const resolveImage = (imagePath: string | undefined) => {
 			<section class="category-section daily">
 				<div class="section-title">
 					<h2>☕ 日常</h2>
-					<a href={`${import.meta.env.BASE_URL}/category/daily`}>もっと見る ❯</a>
+					<a href={`/category/daily`}>もっと見る ❯</a>
 				</div>
 				<ul class="post-list">
 					{dailyPosts.map((post) => (
 						<li>
-							<a href={`${import.meta.env.BASE_URL}/blog/${post.id}/`}>
+							<a href={`/blog/${post.id}/`}>
 								{post.data.heroImage ? (
 									<img class="post-thumbnail" src={resolveImage(post.data.heroImage)} alt="" />
 								) : (
@@ -275,12 +275,12 @@ const resolveImage = (imagePath: string | undefined) => {
 			<section class="category-section game">
 				<div class="section-title">
 					<h2>🎮 ゲーム</h2>
-					<a href={`${import.meta.env.BASE_URL}/category/game`}>もっと見る ❯</a>
+					<a href={`/category/game`}>もっと見る ❯</a>
 				</div>
 				<ul class="post-list">
 					{gamePosts.map((post) => (
 						<li>
-							<a href={`${import.meta.env.BASE_URL}/blog/${post.id}/`}>
+							<a href={`/blog/${post.id}/`}>
 								{post.data.heroImage ? (
 									<img class="post-thumbnail" src={resolveImage(post.data.heroImage)} alt="" />
 								) : (

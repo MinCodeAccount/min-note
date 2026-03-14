@@ -33,15 +33,14 @@ if (toc.length === 0) {
 
 <style>
 	.toc-container {
-		background-color: rgba(248, 249, 250, 0.7);
-		backdrop-filter: blur(8px);
-		-webkit-backdrop-filter: blur(8px);
-		border: 1px solid rgba(233, 236, 239, 0.8);
-		border-radius: 12px;
-		padding: 1.25rem 1.75rem;
+		background-color: var(--gray-light, #f4f5f7);
+		border: 1px solid var(--gray-line, #e9ecef);
+		border-radius: 8px;
+		padding: 1.5rem 2rem;
 		margin: 2rem 0 3rem 0;
-		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+		box-shadow: none; /* remove deep shadow for a flatter modern look */
 		transition: all 0.3s ease;
+		color: rgb(var(--gray-dark));
 	}
 	
 	.toc-container:hover {
@@ -51,14 +50,14 @@ if (toc.length === 0) {
   /* Dark mode support if available */
   @media (prefers-color-scheme: dark) {
     .toc-container {
-      background-color: rgba(30, 30, 42, 0.6); /* soft translucent dark */
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      background-color: transparent; /* "Design B" for dark mode: transparent with border */
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: none;
       color: #e2e8f0; /* light text for dark mode */
     }
     .toc-container:hover {
-		box-shadow: 0 6px 24px rgba(0, 0, 0, 0.3);
-		border: 1px solid rgba(255, 255, 255, 0.12);
+		box-shadow: none;
+		border: 1px solid rgba(255, 255, 255, 0.25);
 	}
     .toc-item a {
       color: #cbd5e1; /* ensure links are light colored in dark mode */
@@ -76,9 +75,9 @@ if (toc.length === 0) {
 
 	.toc-details summary {
 		font-weight: 600;
-		font-size: 1.1rem;
+		font-size: 1.2rem;
 		cursor: pointer;
-		margin-bottom: 0.5rem;
+		margin-bottom: 1.5rem; /* Increased margin below title */
 		list-style: none; /* Hide default arrow in some browsers */
 		display: flex;
 		align-items: center;
@@ -104,11 +103,11 @@ if (toc.length === 0) {
 	.toc-list {
 		list-style: none;
 		padding: 0;
-		margin: 0.5rem 0 0 0;
+		margin: 0;
 	}
 
 	.toc-item {
-		margin: 0.4rem 0;
+		margin: 0.6rem 0; /* slightly wider lines */
 	}
 
 	/* Indent h3 under h2 */
@@ -118,8 +117,9 @@ if (toc.length === 0) {
 	}
 	
 	.toc-item.depth-3::before {
-		content: '-';
-		margin-right: 0.4rem;
+		content: '↳';
+		margin-right: 0.5rem;
+		font-weight: bold;
 		color: var(--gray, #6c757d);
 	}
 

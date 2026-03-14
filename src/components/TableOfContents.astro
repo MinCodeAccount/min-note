@@ -46,6 +46,16 @@ if (toc.length === 0) {
     .toc-container {
       background-color: #1a1a24; /* deep dark background */
       border: 1px solid #2d2d3a;
+      color: #e2e8f0; /* light text for dark mode */
+    }
+    .toc-item a {
+      color: #e2e8f0; /* ensure links are light colored in dark mode */
+    }
+    .toc-details summary {
+      color: #f8fafc; /* slightly brighter for the summary heading */
+    }
+    .toc-item.depth-3::before {
+      color: #64748b; /* adjust the bullet color specifically for dark mode */
     }
   }
 

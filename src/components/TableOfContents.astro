@@ -33,29 +33,44 @@ if (toc.length === 0) {
 
 <style>
 	.toc-container {
-		background-color: var(--gray-light, #f8f9fa);
-		border: 1px solid var(--gray-line, #e9ecef);
-		border-radius: 8px;
-		padding: 1rem 1.5rem;
-		margin: 2rem 0;
-		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+		background-color: rgba(248, 249, 250, 0.7);
+		backdrop-filter: blur(8px);
+		-webkit-backdrop-filter: blur(8px);
+		border: 1px solid rgba(233, 236, 239, 0.8);
+		border-radius: 12px;
+		padding: 1.25rem 1.75rem;
+		margin: 2rem 0 3rem 0;
+		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+		transition: all 0.3s ease;
+	}
+	
+	.toc-container:hover {
+		box-shadow: 0 6px 24px rgba(0, 0, 0, 0.06);
 	}
 
   /* Dark mode support if available */
   @media (prefers-color-scheme: dark) {
     .toc-container {
-      background-color: #1a1a24; /* deep dark background */
-      border: 1px solid #2d2d3a;
+      background-color: rgba(30, 30, 42, 0.6); /* soft translucent dark */
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
       color: #e2e8f0; /* light text for dark mode */
     }
+    .toc-container:hover {
+		box-shadow: 0 6px 24px rgba(0, 0, 0, 0.3);
+		border: 1px solid rgba(255, 255, 255, 0.12);
+	}
     .toc-item a {
-      color: #e2e8f0; /* ensure links are light colored in dark mode */
+      color: #cbd5e1; /* ensure links are light colored in dark mode */
+    }
+    .toc-item a:hover {
+      color: #818cf8; /* slightly brighter accent hover */
     }
     .toc-details summary {
       color: #f8fafc; /* slightly brighter for the summary heading */
     }
     .toc-item.depth-3::before {
-      color: #64748b; /* adjust the bullet color specifically for dark mode */
+      color: #475569; /* adjust the bullet color specifically for dark mode */
     }
   }
 

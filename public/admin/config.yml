@@ -12,7 +12,7 @@ collections:
     label: "ブログ記事 (Blog Posts)"
     folder: "src/content/blog"
     create: true
-    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    slug: "{{year}}-{{month}}-{{day}}"
     extension: "md"
     format: "frontmatter"
     editor:

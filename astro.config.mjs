@@ -7,8 +7,8 @@ import remarkBaseUrl from './remark-base-url.mjs';
 
 // https://astro.build/config
 export default defineConfig({
-	site: 'https://MinCodeAccount.github.io',
-	base: '/min-note',
+	site: 'https://min-note.com',
+	base: '/',
 	integrations: [mdx(), sitemap()],
 	markdown: {
 		remarkPlugins: [remarkBaseUrl],

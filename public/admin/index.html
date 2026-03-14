@@ -82,23 +82,32 @@
         id: "twitter",
         label: "🐦 Twitter (X) 埋め込み",
         fields: [{name: 'url', label: 'ツイートのURL (またはTwitter公式の「埋め込み」HTMLコード全体)', widget: 'string', required: false, default: ''}],
-        pattern: /<blockquote class="twitter-tweet".*?<a href="(.*?)">.*?<\/blockquote>|<blockquote class="twitter-tweet"><a href="(.*?)"><\/a><\/blockquote>/s,
+        pattern: /(?:<blockquote class="twitter-tweet".*?<a href="(.*?)">.*?<\/blockquote>|<blockquote class="twitter-tweet"><a href="(.*?)"><\/a><\/blockquote>|<a class="twitter-timeline".*?href="(.*?)">.*?<\/a>)/s,
         fromBlock: function(match) {
-          // Twitter HTMLブロック全体が貼られた場合は match[1]、単なるURLを元に再生成されたものは match[2]
-          return { url: match[1] || match[2] };
+          // match[1] or match[2]: standard tweet. match[3]: timeline (profile, hashtag)
+          return { url: match[1] || match[2] || match[3] };
         },
         toBlock: function(obj) {
-          // ユーザーがHTML全体を貼った場合でも、内部的にキレイな標準形式に整形して保存
-          let cleanUrl = obj.url;
-          // もし入力欄全体にHTMLが貼られた場合は、そこからURLだけを抽出する安全処理
-          if (cleanUrl && cleanUrl.includes('twitter.com') && cleanUrl.includes('<blockquote')) {
-              const urlMatch = cleanUrl.match(/href="(https:\/\/(?:twitter|x)\.com\/.*?\/status\/.*?)(?:\?.*?)?"/);
-              if (urlMatch) cleanUrl = urlMatch[1];
+          let cleanUrl = obj.url || '';
+          
+          // ユーザーがHTML全体を貼った場合、そこからURLだけを抽出する
+          const htmlMatch = cleanUrl.match(/href="(https:\/\/(?:twitter|x)\.com\/[^"]+)"/);
+          if (htmlMatch) {
+              cleanUrl = htmlMatch[1];
           }
-          return '<blockquote class="twitter-tweet"><a href="' + cleanUrl + '"></a></blockquote>';
+
+          if (cleanUrl.includes('/status/')) {
+              // 単体のツイート
+              return '<blockquote class="twitter-tweet"><a href="' + cleanUrl + '"></a></blockquote>';
+          } else if (cleanUrl.trim() !== '') {
+              // ハッシュタグやプロフィールのタイムライン
+              return '<a class="twitter-timeline" data-height="600" href="' + cleanUrl + '">Twitter Timeline</a>';
+          } else {
+              return '';
+          }
         },
         toPreview: function(obj) {
-          return '<div style="background:#ddd; padding:20px; text-align:center;">Twitter (X) プレビュー枠: ' + obj.url + '</div>';
+          return '<div style="background:#ddd; padding:20px; text-align:center;">Twitter (X) プレビュー枠: ' + (obj.url || '') + '</div>';
         }
       });
       // 4. 日経電子版 (Nikkei) 記事埋め込み用のカスタム部品

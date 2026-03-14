@@ -6,15 +6,28 @@
     <title>Min-Note 管理画面</title>
   </head>
   <body>
+    <!-- Clear Service Workers aggressively to ensure Sveltia CMS version changes bypass local caching -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+          for(let registration of registrations) {
+            registration.unregister().then(function(boolean) {
+              console.log("Service Worker unregistered: " + boolean);
+            });
+          }
+        });
+      }
+    </script>
     <!-- Sveltia CMS (Decap CMSのモダン/サーバーレス版。GitHub PATにネイティブ対応) -->
-    <script src="https://unpkg.com/@sveltia/cms/dist/sveltia-cms.js"></script>
+    <!-- v0.144.0 (March 4) is stable. parameter t added to bypass browser cache -->
+    <script src="https://unpkg.com/@sveltia/cms@0.144.0/dist/sveltia-cms.js?t=resetcache_20260314"></script>
 
     <script>
       // 1. YouTube埋め込み用のカスタム部品
       CMS.registerEditorComponent({
         id: "youtube",
         label: "📺 YouTube 埋め込み",
-        fields: [{name: 'id', label: 'YouTube動画 (URL、埋め込みタグ全体、または動画ID)', widget: 'string'}],
+        fields: [{name: 'id', label: 'YouTube動画 (URL、埋め込みタグ全体、または動画ID)', widget: 'string', required: false, default: ''}],
         pattern: /^<div class="youtube-wrapper"><iframe src="https:\/\/www\.youtube\.com\/embed\/(.*?)" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen><\/iframe><\/div>$/,
         fromBlock: function(match) {
           return { id: match[1] };
@@ -52,7 +65,7 @@
       CMS.registerEditorComponent({
         id: "video",
         label: "🎬 動画アップロード (MP4等)",
-        fields: [{name: 'url', label: '動画を選択・アップロードしてください', widget: 'file'}],
+        fields: [{name: 'url', label: '動画を選択・アップロードしてください', widget: 'file', required: false, default: ''}],
         pattern: /^<video controls src="(.*?)" style="max-width: 100%; border-radius: 8px; margin: 1em 0;"><\/video>$/,
         fromBlock: function(match) {
           return { url: match[1] };
@@ -68,7 +81,7 @@
       CMS.registerEditorComponent({
         id: "twitter",
         label: "🐦 Twitter (X) 埋め込み",
-        fields: [{name: 'url', label: 'ツイートのURL (またはTwitter公式の「埋め込み」HTMLコード全体)', widget: 'string'}],
+        fields: [{name: 'url', label: 'ツイートのURL (またはTwitter公式の「埋め込み」HTMLコード全体)', widget: 'string', required: false, default: ''}],
         pattern: /<blockquote class="twitter-tweet".*?<a href="(.*?)">.*?<\/blockquote>|<blockquote class="twitter-tweet"><a href="(.*?)"><\/a><\/blockquote>/s,
         fromBlock: function(match) {
           // Twitter HTMLブロック全体が貼られた場合は match[1]、単なるURLを元に再生成されたものは match[2]
@@ -92,7 +105,7 @@
       CMS.registerEditorComponent({
         id: "nikkei",
         label: "📰 日経電子版 (ブログカード) 埋め込み",
-        fields: [{name: 'url', label: '日経電子版の記事URL (例: https://www.nikkei.com/article/DGXZQO...)', widget: 'string'}],
+        fields: [{name: 'url', label: '日経電子版の記事URL (例: https://www.nikkei.com/article/DGXZQO...)', widget: 'string', required: false, default: ''}],
         pattern: /<iframe src="(https:\/\/www\.nikkei\.com\/.*?\/embed|https:\/\/hatenablog-parts\.com\/embed\?url=https:\/\/www\.nikkei\.com\/.*?)"[^>]*><\/iframe>/,
         fromBlock: function(match) {
           let extractedUrl = match[1];

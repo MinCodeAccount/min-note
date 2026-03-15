@@ -81,24 +81,49 @@
       CMS.registerEditorComponent({
         id: "twitter",
         label: "🐦 Twitter (X) 埋め込み",
-        fields: [{name: 'url', label: 'ツイートのURL (またはTwitter公式の「埋め込み」HTMLコード全体)', widget: 'string', required: false, default: ''}],
-        pattern: /(?:<blockquote class="twitter-tweet".*?<a href="(.*?)">.*?<\/blockquote>|<blockquote class="twitter-tweet"><a href="(.*?)"><\/a><\/blockquote>|<a class="twitter-timeline".*?href="(.*?)">.*?<\/a>)/s,
+        fields: [
+            {name: 'url', label: 'ツイートのURL (またはTwitter公式の「埋め込み」HTMLコード全体)', widget: 'string', required: false, default: ''},
+            {name: 'video', label: '動画専用レイアウト (Embedded Video)', widget: 'boolean', required: false, default: true}
+        ],
+        pattern: /(<blockquote class="twitter-tweet".*?<\/blockquote>|<a class="twitter-timeline".*?<\/a>)/s,
         fromBlock: function(match) {
-          // match[1] or match[2]: standard tweet. match[3]: timeline (profile, hashtag)
-          return { url: match[1] || match[2] || match[3] };
+          const raw = match[0] || match[1] || '';
+          const isVideo = raw.includes('data-media-max-width');
+          let url = '';
+          const statusMatch = raw.match(/href="(https:\/\/(?:twitter|x)\.com\/[^/]+\/status\/[^"]+)"/);
+          if (statusMatch) {
+              url = statusMatch[1];
+          } else {
+              const anyMatch = raw.match(/href="(https:\/\/(?:twitter|x)\.com\/[^"]+)"/);
+              if (anyMatch) url = anyMatch[1];
+          }
+          return { url: url, video: isVideo };
         },
         toBlock: function(obj) {
           let cleanUrl = obj.url || '';
           
-          // ユーザーがHTML全体を貼った場合、そこからURLだけを抽出する
-          const htmlMatch = cleanUrl.match(/href="(https:\/\/(?:twitter|x)\.com\/[^"]+)"/);
+          // ユーザーがHTML全体を貼った場合、そこから /status/ を含むURLを優先抽出
+          const htmlMatch = cleanUrl.match(/href="(https:\/\/(?:twitter|x)\.com\/[^/]+\/status\/[^"]+)"/);
           if (htmlMatch) {
               cleanUrl = htmlMatch[1];
+          } else {
+              // 単なるURLのベタ貼りか、Timelineなどの場合
+              const htmlMatchOther = cleanUrl.match(/href="(https:\/\/(?:twitter|x)\.com\/[^"]+)"/);
+              if (htmlMatchOther) {
+                  cleanUrl = htmlMatchOther[1];
+              }
           }
+
+          // 不要なパラメータや引用符を除去
+          cleanUrl = cleanUrl.split('"')[0].split("'")[0];
 
           if (cleanUrl.includes('/status/')) {
               // 単体のツイート
-              return '<blockquote class="twitter-tweet"><a href="' + cleanUrl + '"></a></blockquote>';
+              if (obj.video) {
+                  return '<blockquote class="twitter-tweet" data-media-max-width="560"><a href="' + cleanUrl + '"></a></blockquote>';
+              } else {
+                  return '<blockquote class="twitter-tweet"><a href="' + cleanUrl + '"></a></blockquote>';
+              }
           } else if (cleanUrl.trim() !== '') {
               // ハッシュタグやプロフィールのタイムライン
               return '<a class="twitter-timeline" data-height="600" href="' + cleanUrl + '">Twitter Timeline</a>';
@@ -107,7 +132,7 @@
           }
         },
         toPreview: function(obj) {
-          return '<div style="background:#ddd; padding:20px; text-align:center;">Twitter (X) プレビュー枠: ' + (obj.url || '') + '</div>';
+          return '<div style="background:#ddd; padding:20px; text-align:center;">Twitter (X) プレビュー枠: ' + (obj.url || '') + (obj.video ? ' (動画サイズ制限あり)' : '') + '</div>';
         }
       });
       // 4. 日経電子版 (Nikkei) 記事埋め込み用のカスタム部品

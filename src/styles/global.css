@@ -5,8 +5,9 @@
  */
 
 :root {
-	--accent: #2337ff;
-	--accent-dark: #000d8a;
+	/* ベース（Bear Blog 由来） */
+	--accent: #d6336c;          /* リンク等に使う、読みやすいローズ系アクセント */
+	--accent-dark: #a61e4d;
 	--black: 15, 18, 25;
 	--gray: 96, 115, 159;
 	--gray-light: 229, 233, 240;
@@ -15,6 +16,23 @@
 	--box-shadow:
 		0 2px 6px rgba(var(--gray), 25%), 0 8px 24px rgba(var(--gray), 33%), 0 16px 32px
 		rgba(var(--gray), 33%);
+
+	/* === みんの日常 パステルテーマ === */
+	--pink: #ff9a9e;
+	--pink-soft: #fecfef;
+	--cyan: #bdf1f6;
+	--cyan-deep: #8be0e8;
+	--cream: #fdfbf7;
+	--yellow: #fff3b0;
+	--green: #a0fca5;
+
+	/* 騰落カラー（日本式：上げ=赤 / 下げ=青） */
+	--up: #e03131;
+	--down: #1c7ed6;
+	--flat: #868e96;
+
+	/* 日本語向けフォントスタック */
+	--font-jp: 'Hiragino Maru Gothic ProN', 'Zen Maru Gothic', 'Rounded Mplus 1c', 'Meiryo', sans-serif;
 }
 @font-face {
 	font-family: "Atkinson";
@@ -31,7 +49,7 @@
 	font-display: swap;
 }
 body {
-	font-family: "Atkinson", sans-serif;
+	font-family: "Atkinson", var(--font-jp);
 	margin: 0;
 	padding: 0;
 	text-align: left;
@@ -171,3 +189,34 @@ hr {
 	width: 100%;
 	height: 100%;
 }
+
+/* === 投資カテゴリ向けの共通パーツ === */
+.change-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.15em;
+	font-weight: 700;
+	font-size: 0.8em;
+	padding: 0.1em 0.7em;
+	border-radius: 999px;
+	line-height: 1.7;
+	white-space: nowrap;
+	color: #fff;
+	background: var(--flat);
+	vertical-align: middle;
+}
+.change-badge.up { background: var(--up); }
+.change-badge.down { background: var(--down); }
+.change-badge.flat { background: var(--flat); }
+
+.disclaimer {
+	margin: 3rem 0 0;
+	padding: 1rem 1.25rem;
+	background: var(--cream);
+	border: 1px dashed #e0c9a6;
+	border-radius: 12px;
+	font-size: 0.8em;
+	line-height: 1.8;
+	color: #8a7a5c;
+}
+.disclaimer strong { color: #b5852a; }

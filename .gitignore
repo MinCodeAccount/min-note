@@ -26,3 +26,9 @@ pnpm-debug.log*
 # TinaCMS generated files
 tina/__generated__/
 
+# 投資記事の元PDF（AI自動投稿の入力。PDFはコミットしない）
+pdf-inbox/*.pdf
+
+# AI自動投稿の一時プロンプト
+scripts/.daily-prompt.txt
+

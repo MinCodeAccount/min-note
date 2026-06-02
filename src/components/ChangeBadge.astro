@@ -1,0 +1,23 @@
+---
+// 騰落率バッジ。日本式（上げ=赤 / 下げ=青 / 変わらず=グレー）。
+// change 例: "-633円 (-1.16%)" / "+0.5%" / "▲1.2%" / "変わらず"
+interface Props {
+	change?: string;
+}
+const { change } = Astro.props;
+
+let dir: 'up' | 'down' | 'flat' = 'flat';
+if (change) {
+	const s = change.replace(/[\s,]/g, '');
+	if (/^[-−▲△]/.test(s) || /(安|下落|下げ|減|マイナス)/.test(change)) {
+		dir = 'down';
+	} else if (/^[+＋]/.test(s) || /(高|上昇|上げ|反発|増|プラス)/.test(change)) {
+		dir = 'up';
+	} else {
+		const num = parseFloat(s.replace(/[^0-9.\-]/g, ''));
+		if (!Number.isNaN(num)) dir = num < 0 ? 'down' : num > 0 ? 'up' : 'flat';
+	}
+}
+const arrow = dir === 'up' ? '↑' : dir === 'down' ? '↓' : '→';
+---
+{change && <span class={`change-badge ${dir}`}>{arrow} {change}</span>}

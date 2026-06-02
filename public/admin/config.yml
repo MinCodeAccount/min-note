@@ -23,4 +23,6 @@ collections:
       - { label: "公開日", name: "pubDate", widget: "datetime", date_format: "YYYY-MM-DD", time_format: "HH:mm:ss.SSS[Z]", picker_utc: true }
       - { label: "ヒーロー画像", name: "heroImage", widget: "image", required: false }
       - { label: "カテゴリ", name: "category", widget: "select", options: ["anime", "investment", "daily", "game"], default: "daily" }
+      - { label: "騰落率 (投資用・任意 例: -1.16%)", name: "change", widget: "string", required: false }
+      - { label: "下書き (ONの間はサイトに公開されません)", name: "draft", widget: "boolean", default: false, required: false }
       - { label: "本文", name: "body", widget: "markdown" }

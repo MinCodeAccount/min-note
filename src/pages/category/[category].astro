@@ -1,14 +1,14 @@
 ---
 import { getCollection } from 'astro:content';
-import { Image } from 'astro:assets';
 import BaseHead from '../../components/BaseHead.astro';
 import Footer from '../../components/Footer.astro';
 import FormattedDate from '../../components/FormattedDate.astro';
 import Header from '../../components/Header.astro';
+import ChangeBadge from '../../components/ChangeBadge.astro';
 import { SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
 
 export async function getStaticPaths() {
-	const posts = await getCollection('blog');
+	const posts = await getCollection('blog', ({ data }) => data.draft !== true);
 	const predefinedCategories = ['anime', 'investment', 'daily', 'game'];
 	const uniqueCategories = [
 		...new Set([
@@ -56,7 +56,7 @@ const resolveImage = (imagePath: string | undefined) => {
 				max-width: 100%;
 				margin: 0 auto;
 				padding: 2rem;
-				font-family: 'Hiragino Maru Gothic ProN', 'Rounded M+ 1c', 'Zen Maru Gothic', 'Meiryo', sans-serif;
+				font-family: var(--font-jp);
 			}
 			.category-header {
 				text-align: center;
@@ -81,7 +81,7 @@ const resolveImage = (imagePath: string | undefined) => {
 				line-height: 1.8;
 				margin: 2rem 0;
 			}
-			ul {
+			ul.cards {
 				display: flex;
 				flex-wrap: wrap;
 				gap: 2rem;
@@ -89,29 +89,29 @@ const resolveImage = (imagePath: string | undefined) => {
 				margin: 0;
 				padding: 0;
 			}
-			ul li {
+			ul.cards li {
 				width: calc(50% - 1rem);
 			}
-			ul li * {
+			ul.cards li * {
 				text-decoration: none;
 				transition: 0.2s ease;
 			}
-			ul li:first-child {
+			ul.cards li:first-child {
 				width: 100%;
 				margin-bottom: 1rem;
 				text-align: center;
 			}
-			ul li:first-child img {
+			ul.cards li:first-child img {
 				width: 100%;
 			}
-			ul li:first-child .title {
+			ul.cards li:first-child .title {
 				font-size: 2.369rem;
 			}
-			ul li img {
+			ul.cards li img {
 				margin-bottom: 0.5rem;
 				border-radius: 12px;
 			}
-			ul li a {
+			ul.cards li a {
 				display: block;
 			}
 			.title {
@@ -123,26 +123,72 @@ const resolveImage = (imagePath: string | undefined) => {
 				margin: 0;
 				color: rgb(var(--gray));
 			}
-			ul li a:hover h4,
-			ul li a:hover .date {
+			ul.cards li a:hover h4,
+			ul.cards li a:hover .date {
 				color: rgb(var(--accent));
 			}
-			ul a:hover img {
+			ul.cards a:hover img {
 				box-shadow: var(--box-shadow);
 			}
+
+			/* 投資カテゴリ：コンパクトな相場一覧 */
+			.market-list {
+				list-style: none;
+				padding: 0;
+				margin: 0;
+				display: flex;
+				flex-direction: column;
+				gap: 0.6rem;
+			}
+			.market-list li {
+				background: #fff;
+				border: 1px solid #eee;
+				border-radius: 10px;
+				transition: all 0.2s;
+			}
+			.market-list li:hover {
+				transform: translateX(4px);
+				box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+				border-color: var(--cyan-deep);
+			}
+			.market-list a {
+				display: flex;
+				align-items: center;
+				gap: 0.8rem;
+				padding: 0.8rem 1rem;
+				text-decoration: none;
+				color: #333;
+			}
+			.market-list .m-date {
+				color: #888;
+				font-size: 0.85em;
+				white-space: nowrap;
+				font-variant-numeric: tabular-nums;
+			}
+			.market-list .m-title {
+				flex-grow: 1;
+				font-weight: bold;
+				line-height: 1.4;
+			}
 			@media (max-width: 720px) {
-				ul {
+				ul.cards {
 					gap: 0.5em;
 				}
-				ul li {
+				ul.cards li {
 					width: 100%;
 					text-align: center;
 				}
-				ul li:first-child {
+				ul.cards li:first-child {
 					margin-bottom: 0;
 				}
-				ul li:first-child .title {
+				ul.cards li:first-child .title {
 					font-size: 1.563em;
+				}
+				.market-list a {
+					flex-wrap: wrap;
+				}
+				.market-list .m-title {
+					width: 100%;
 				}
 			}
 		</style>
@@ -155,28 +201,38 @@ const resolveImage = (imagePath: string | undefined) => {
 				<p>このテーマに関する投稿です！</p>
 			</section>
 			<section>
-				{posts.length > 0 ? (
-					<ul>
-						{
-							posts.map((post) => (
-								<li>
-									<a href={`/blog/${post.id}/`}>
-										{post.data.heroImage && (
-											<img width={720} height={360} src={resolveImage(post.data.heroImage)} alt="" />
-										)}
-										<h4 class="title">{post.data.title}</h4>
-										<p class="date">
-											<FormattedDate date={post.data.pubDate} />
-										</p>
-									</a>
-								</li>
-							))
-						}
-					</ul>
-				) : (
+				{posts.length === 0 ? (
 					<div class="empty-message">
 						<p>🙇‍♀️<br>現在、このカテゴリの記事はまだありません…<br>今後の更新を楽しみにお待ちください！</p>
 					</div>
+				) : category === 'investment' ? (
+					<ul class="market-list">
+						{posts.map((post) => (
+							<li>
+								<a href={`/blog/${post.id}/`}>
+									<span class="m-date"><FormattedDate date={post.data.pubDate} /></span>
+									{post.data.change && <ChangeBadge change={post.data.change} />}
+									<span class="m-title">{post.data.title}</span>
+								</a>
+							</li>
+						))}
+					</ul>
+				) : (
+					<ul class="cards">
+						{posts.map((post) => (
+							<li>
+								<a href={`/blog/${post.id}/`}>
+									{post.data.heroImage && (
+										<img width={720} height={360} src={resolveImage(post.data.heroImage)} alt="" />
+									)}
+									<h4 class="title">{post.data.title}</h4>
+									<p class="date">
+										<FormattedDate date={post.data.pubDate} />
+									</p>
+								</a>
+							</li>
+						))}
+					</ul>
 				)}
 			</section>
 		</main>

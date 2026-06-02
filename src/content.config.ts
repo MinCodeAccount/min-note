@@ -14,6 +14,10 @@ const blog = defineCollection({
 			updatedDate: z.coerce.date().optional(),
 			heroImage: z.string().optional(),
 			category: z.string().optional(),
+			// 騰落率など（投資カテゴリで使用、例: "-1.16%"）
+			change: z.string().optional(),
+			// 下書き（true の記事はサイトに公開されない）
+			draft: z.boolean().optional().default(false),
 		}),
 });
 

@@ -6,11 +6,13 @@ import Footer from '../components/Footer.astro';
 import FormattedDate from '../components/FormattedDate.astro';
 import Header from '../components/Header.astro';
 import TableOfContents from '../components/TableOfContents.astro';
+import ChangeBadge from '../components/ChangeBadge.astro';
+import Disclaimer from '../components/Disclaimer.astro';
 import type { MarkdownHeading } from 'astro';
 
 type Props = CollectionEntry<'blog'>['data'] & { headings?: MarkdownHeading[] };
 
-const { title, description, pubDate, updatedDate, heroImage, headings = [] } = Astro.props;
+const { title, description, pubDate, updatedDate, heroImage, category, change, headings = [] } = Astro.props;
 
 const base = '';
 const heroImageSrc = typeof heroImage === 'string' 
@@ -18,7 +20,7 @@ const heroImageSrc = typeof heroImage === 'string'
   : undefined;
 ---
 
-<html lang="en">
+<html lang="ja">
 	<head>
 		<BaseHead title={title} description={description} image={heroImageSrc} />
 		<style>
@@ -83,6 +85,7 @@ const heroImageSrc = typeof heroImage === 'string'
 					<div class="title">
 						<div class="date">
 							<FormattedDate date={pubDate} />
+							{change && <ChangeBadge change={change} />}
 							{
 								updatedDate && (
 									<div class="last-updated-on">
@@ -96,6 +99,7 @@ const heroImageSrc = typeof heroImage === 'string'
 					</div>
 					<TableOfContents headings={headings} />
 					<slot />
+						{category === 'investment' && <Disclaimer />}
 					
 					<div class="giscus-container" style="margin-top: 4rem; padding-top: 2rem; border-top: 2px dashed #eee;">
 						<script src="https://giscus.app/client.js"

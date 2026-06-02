@@ -111,6 +111,20 @@ if ($NoPush) {
     Write-Host "==> -NoPush set; not pushing. Push manually after review."
 }
 else {
+    # The CMS (min-note.com/admin) may have pushed new posts since the last run,
+    # so the local branch can be behind. Sync first, otherwise push is rejected
+    # as non-fast-forward. A new dated post file does not conflict with CMS posts.
+    git -C $RepoRoot fetch origin main
+    git -C $RepoRoot rebase origin/main
+    if ($LASTEXITCODE -ne 0) {
+        git -C $RepoRoot rebase --abort
+        Write-Error "Rebase onto origin/main failed (conflict). Resolve manually, then push."
+        exit 1
+    }
     git -C $RepoRoot push origin main
+    if ($LASTEXITCODE -ne 0) {
+        Write-Error "git push failed (check credentials/remote)."
+        exit 1
+    }
     Write-Host "==> Pushed. Review the draft at https://min-note.com/admin"
 }

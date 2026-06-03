@@ -47,18 +47,22 @@ if (-not (Test-Path $TemplateFile)) {
 
 Write-Host "==> Target date: $Date"
 
-# 1) Find the PDF
-$pdf = Join-Path $InboxDir "$Date.pdf"
-if (-not (Test-Path $pdf)) {
-    $latest = Get-ChildItem -Path $InboxDir -Filter *.pdf -File -ErrorAction SilentlyContinue |
-        Sort-Object LastWriteTime -Descending | Select-Object -First 1
-    if ($null -eq $latest) {
-        Write-Error "No PDF found. Put $Date.pdf into $InboxDir"
-        exit 1
-    }
-    $pdf = $latest.FullName
-    Write-Host "==> $Date.pdf not found; using newest PDF: $($latest.Name)"
+# 1) Find the PDF for the target date.
+#    Accept both "YYYY-MM-DD.pdf" and the no-dash "YYYYMMDD.pdf" form the user uses.
+#    Do NOT fall back to an arbitrary newest PDF: that once produced a wrong-dated
+#    article (a late-evening run grabbed the PREVIOUS day's PDF).
+$dateCompact = $Date.Replace('-', '')
+$pdf = $null
+foreach ($name in @("$Date.pdf", "$dateCompact.pdf")) {
+    $candidate = Join-Path $InboxDir $name
+    if (Test-Path $candidate) { $pdf = $candidate; break }
 }
+if ($null -eq $pdf) {
+    Write-Host "==> No PDF for $Date in $InboxDir (looked for: $Date.pdf, $dateCompact.pdf)."
+    Write-Host "==> Nothing to do. Add the PDF and re-run this script manually."
+    exit 0
+}
+Write-Host "==> Using PDF: $(Split-Path $pdf -Leaf)"
 
 # 2) Output path (if same date already exists, use -2, -3, ...)
 $slug = $Date

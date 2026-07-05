@@ -1,6 +1,6 @@
-﻿---
-import { Image } from 'astro:assets';
+---
 import type { CollectionEntry } from 'astro:content';
+import { getCollection } from 'astro:content';
 import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
 import FormattedDate from '../components/FormattedDate.astro';
@@ -8,16 +8,42 @@ import Header from '../components/Header.astro';
 import TableOfContents from '../components/TableOfContents.astro';
 import ChangeBadge from '../components/ChangeBadge.astro';
 import Disclaimer from '../components/Disclaimer.astro';
+import { categoryLabel } from '../consts';
 import type { MarkdownHeading } from 'astro';
 
-type Props = CollectionEntry<'blog'>['data'] & { headings?: MarkdownHeading[] };
+type PostLink = { id: string; title: string } | null;
+type Props = CollectionEntry<'blog'>['data'] & {
+	headings?: MarkdownHeading[];
+	prevPost?: PostLink;
+	nextPost?: PostLink;
+};
 
-const { title, description, pubDate, updatedDate, heroImage, category, change, headings = [] } = Astro.props;
+const {
+	title,
+	description,
+	pubDate,
+	updatedDate,
+	heroImage,
+	category,
+	subcategory,
+	change,
+	headings = [],
+	prevPost = null,
+	nextPost = null,
+} = Astro.props;
 
 const base = '';
-const heroImageSrc = typeof heroImage === 'string' 
+const heroImageSrc = typeof heroImage === 'string'
   ? (heroImage.startsWith('/') ? `${base}${heroImage}` : `${base}/${heroImage}`)
   : undefined;
+
+const catTitle = category ? categoryLabel(category) : undefined;
+// サブカテゴリの表示名を解決（定義に無い値なら表示しない）
+const subEntry = subcategory
+	? (await getCollection('subcategories')).find(
+			(s) => s.data.category === category && s.data.slug === subcategory
+		)
+	: undefined;
 ---
 
 <html lang="ja">
@@ -49,11 +75,25 @@ const heroImageSrc = typeof heroImage === 'string'
 				padding: 1em;
 				color: rgb(var(--gray-dark));
 			}
+			.breadcrumb {
+				font-size: 0.85em;
+				margin-bottom: 1rem;
+				color: rgb(var(--gray));
+				font-family: var(--font-jp);
+			}
+			.breadcrumb a {
+				color: rgb(var(--gray));
+				text-decoration: none;
+			}
+			.breadcrumb a:hover {
+				color: var(--accent);
+				text-decoration: underline;
+			}
 			.title {
 				margin-bottom: 1em;
 				padding: 1em 0;
 				text-align: center;
-				line-height: 1;
+				line-height: 1.4;
 			}
 			.title h1 {
 				margin: 0 0 0.5em 0;
@@ -71,6 +111,75 @@ const heroImageSrc = typeof heroImage === 'string'
 			.prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
 				scroll-margin-top: 5rem; /* Prevents sticky headers (if any) from covering the heading when clicked */
 			}
+			/* 前後記事ナビ */
+			.post-nav {
+				display: flex;
+				gap: 1rem;
+				margin-top: 3rem;
+				font-family: var(--font-jp);
+			}
+			.post-nav a {
+				flex: 1;
+				display: block;
+				padding: 1rem;
+				background: #fdfbf7;
+				border: 2px solid #eee;
+				border-radius: 12px;
+				text-decoration: none;
+				color: #333;
+				transition: all 0.2s;
+				min-width: 0;
+			}
+			.post-nav a:hover {
+				border-color: var(--cyan-deep);
+				box-shadow: 0 4px 8px rgba(139, 224, 232, 0.3);
+			}
+			.post-nav .nav-label {
+				display: block;
+				font-size: 0.8em;
+				color: #999;
+				margin-bottom: 0.3rem;
+			}
+			.post-nav .nav-title {
+				display: block;
+				font-weight: bold;
+				font-size: 0.9em;
+				line-height: 1.4;
+				overflow: hidden;
+				display: -webkit-box;
+				-webkit-line-clamp: 2;
+				-webkit-box-orient: vertical;
+			}
+			.post-nav .nav-next {
+				text-align: right;
+			}
+			.post-nav-category {
+				text-align: center;
+				margin-top: 1rem;
+				font-family: var(--font-jp);
+			}
+			.post-nav-category a {
+				display: inline-block;
+				padding: 0.5rem 1.5rem;
+				background: #fff0f1;
+				border-radius: 20px;
+				color: #ff9a9e;
+				font-weight: bold;
+				text-decoration: none;
+				transition: all 0.2s;
+			}
+			.post-nav-category a:hover {
+				color: #ff7479;
+				background: #ffe3e5;
+			}
+			@media (max-width: 720px) {
+				.post-nav {
+					flex-direction: column;
+				}
+				.post-nav .nav-next {
+					text-align: left;
+				}
+			}
 		</style>
 	</head>
 
@@ -81,7 +190,16 @@ const heroImageSrc = typeof heroImage === 'string'
 				<div class="hero-image">
 					{heroImage && <img width={1020} height={510} src={heroImageSrc} alt="" />}
 				</div>
-				<div class="prose">
+				<div class="prose" data-pagefind-body>
+					{catTitle && (
+						<nav class="breadcrumb" aria-label="パンくずリスト" data-pagefind-ignore>
+							<a href="/">ホーム</a>
+							 › <a href={`/category/${category}/`}>{catTitle}</a>
+							{subEntry && (
+								<> › <a href={`/category/${category}/${subEntry.data.slug}/`}>{subEntry.data.label}</a></>
+							)}
+						</nav>
+					)}
 					<div class="title">
 						<div class="date">
 							<FormattedDate date={pubDate} />
@@ -89,7 +207,7 @@ const heroImageSrc = typeof heroImage === 'string'
 							{
 								updatedDate && (
 									<div class="last-updated-on">
-										Last updated on <FormattedDate date={updatedDate} />
+										最終更新: <FormattedDate date={updatedDate} />
 									</div>
 								)
 							}
@@ -100,8 +218,30 @@ const heroImageSrc = typeof heroImage === 'string'
 					<TableOfContents headings={headings} />
 					<slot />
 						{category === 'investment' && <Disclaimer />}
-					
-					<div class="giscus-container" style="margin-top: 4rem; padding-top: 2rem; border-top: 2px dashed #eee;">
+
+					{(prevPost || nextPost) && (
+						<nav class="post-nav" aria-label="前後の記事" data-pagefind-ignore>
+							{prevPost && (
+								<a href={`/blog/${prevPost.id}/`} class="nav-prev">
+									<span class="nav-label">← 前の記事</span>
+									<span class="nav-title">{prevPost.title}</span>
+								</a>
+							)}
+							{nextPost && (
+								<a href={`/blog/${nextPost.id}/`} class="nav-next">
+									<span class="nav-label">次の記事 →</span>
+									<span class="nav-title">{nextPost.title}</span>
+								</a>
+							)}
+						</nav>
+					)}
+					{catTitle && (
+						<div class="post-nav-category" data-pagefind-ignore>
+							<a href={`/category/${category}/`}>{catTitle} の記事一覧へ ❯</a>
+						</div>
+					)}
+
+					<div class="giscus-container" data-pagefind-ignore style="margin-top: 4rem; padding-top: 2rem; border-top: 2px dashed #eee;">
 						<script src="https://giscus.app/client.js"
 								data-repo="MinCodeAccount/min-note"
 								data-repo-id="R_kgDORaVXkA"

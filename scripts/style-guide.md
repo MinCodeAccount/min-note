@@ -17,6 +17,7 @@ title: "3/13 日経平均、週末をまたぎたくない投資家心理が現�
 description: "日経平均は -633円安（-1.16%）となりました。"        # 終値・騰落の一言サマリ
 pubDate: <対象日>                                                # 例: 2026-06-02
 category: investment                                            # 固定
+subcategory: daily-report                                       # 固定（日次レポート）
 change: "-1.16%"                                                # 騰落率（バッジ表示に使用。PDFにあれば記載）
 draft: true                                                     # 必ず true（下書き）
 # heroImage は付けない（チャート画像は確認時に人が追加します）

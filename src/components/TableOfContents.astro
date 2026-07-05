@@ -47,31 +47,8 @@ if (toc.length === 0) {
 		box-shadow: 0 6px 24px rgba(0, 0, 0, 0.06);
 	}
 
-  /* Dark mode support if available */
-  @media (prefers-color-scheme: dark) {
-    .toc-container {
-      background-color: transparent; /* "Design B" for dark mode: transparent with border */
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      box-shadow: none;
-      color: #e2e8f0; /* light text for dark mode */
-    }
-    .toc-container:hover {
-		box-shadow: none;
-		border: 1px solid rgba(255, 255, 255, 0.25);
-	}
-    .toc-item a {
-      color: #cbd5e1; /* ensure links are light colored in dark mode */
-    }
-    .toc-item a:hover {
-      color: #818cf8; /* slightly brighter accent hover */
-    }
-    .toc-details summary {
-      color: #f8fafc; /* slightly brighter for the summary heading */
-    }
-    .toc-item.depth-3::before {
-      color: #475569; /* adjust the bullet color specifically for dark mode */
-    }
-  }
+	/* サイト全体が常にライト配色のため、ダークモード用の配色は持たない
+	   （ページ背景が白のままTOCだけ薄色文字になり読めなくなるのを防ぐ） */
 
 	.toc-details summary {
 		font-weight: 600;

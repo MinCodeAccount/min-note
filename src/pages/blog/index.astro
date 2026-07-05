@@ -1,27 +1,28 @@
-﻿---
-import { Image } from 'astro:assets';
+---
 import { getCollection } from 'astro:content';
 import BaseHead from '../../components/BaseHead.astro';
 import Footer from '../../components/Footer.astro';
-import FormattedDate from '../../components/FormattedDate.astro';
 import Header from '../../components/Header.astro';
-import { SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
+import PostListItem from '../../components/PostListItem.astro';
+import { SITE_DESCRIPTION, SITE_TITLE, CATEGORIES } from '../../consts';
 
 const posts = (await getCollection('blog', ({ data }) => data.draft !== true)).sort(
 	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
 );
 
 const recentPosts = posts.slice(0, 3);
-const animePosts = posts.filter(post => post.data.category === 'anime').slice(0, 3);
-const investmentPosts = posts.filter(post => post.data.category === 'investment').slice(0, 3);
-const dailyPosts = posts.filter(post => post.data.category === 'daily').slice(0, 3);
-const gamePosts = posts.filter(post => post.data.category === 'game').slice(0, 3);
 
-const resolveImage = (imagePath: string | undefined) => {
-	if (!imagePath) return undefined;
-	const base = '';
-	return imagePath.startsWith('/') ? `${base}${imagePath}` : `${base}/${imagePath}`;
-};
+const allSubs = await getCollection('subcategories');
+
+// カテゴリごとの「最新3件 + サブカテゴリチップ」
+const sections = CATEGORIES.map((c) => ({
+	...c,
+	posts: posts.filter((post) => post.data.category === c.slug).slice(0, 3),
+	total: posts.filter((post) => post.data.category === c.slug).length,
+	subs: allSubs
+		.filter((s) => s.data.category === c.slug)
+		.sort((a, b) => (a.data.order - b.data.order) || a.data.label.localeCompare(b.data.label, 'ja')),
+}));
 ---
 
 <!doctype html>
@@ -36,7 +37,7 @@ const resolveImage = (imagePath: string | undefined) => {
 				max-width: 800px;
 				margin: 0 auto;
 				padding: 2rem;
-				font-family: 'Hiragino Maru Gothic ProN', 'Rounded M+ 1c', 'Zen Maru Gothic', 'Meiryo', sans-serif;
+				font-family: var(--font-jp);
 			}
 			.blog-header {
 				text-align: center;
@@ -58,11 +59,7 @@ const resolveImage = (imagePath: string | undefined) => {
 				margin-bottom: 3rem;
 				box-shadow: 0 4px 10px rgba(0,0,0,0.05);
 			}
-			.category-section.anime { border-color: #bdf1f6; }
-			.category-section.investment { border-color: #fff3b0; }
-			.category-section.daily { border-color: #ffc6c7; }
-			.category-section.game { border-color: #a0fca5; }
-			
+
 			.section-title {
 				display: flex;
 				justify-content: space-between;
@@ -77,6 +74,11 @@ const resolveImage = (imagePath: string | undefined) => {
 				font-size: 1.8em;
 				color: #333;
 			}
+			.section-title h2 .count {
+				color: #999;
+				font-size: 0.6em;
+				font-weight: normal;
+			}
 			.section-title a {
 				text-decoration: none;
 				color: #ff9a9e;
@@ -85,12 +87,37 @@ const resolveImage = (imagePath: string | undefined) => {
 				padding: 0.5rem 1rem;
 				background: #fff0f1;
 				border-radius: 20px;
+				white-space: nowrap;
 			}
 			.section-title a:hover {
 				color: #ff7479;
 				background: #ffe3e5;
 			}
-			
+			/* サブカテゴリのチップ */
+			.sub-chips {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 0.5rem;
+				margin: -0.5rem 0 1.2rem 0;
+			}
+			.sub-chips a {
+				display: inline-block;
+				padding: 0.25rem 0.9rem;
+				background: #f4fdff;
+				border: 2px solid var(--cyan);
+				border-radius: 999px;
+				color: #333;
+				font-weight: bold;
+				font-size: 0.85em;
+				text-decoration: none;
+				transition: all 0.2s;
+			}
+			.sub-chips a:hover {
+				background: #fff;
+				border-color: var(--cyan-deep);
+				box-shadow: 0 4px 8px rgba(139, 224, 232, 0.3);
+			}
+
 			.post-list {
 				list-style: none;
 				padding: 0;
@@ -99,57 +126,29 @@ const resolveImage = (imagePath: string | undefined) => {
 				flex-direction: column;
 				gap: 1rem;
 			}
-			.post-list li {
-				background: #fdfbf7;
-				border-radius: 10px;
-				transition: all 0.2s;
-				border: 1px solid #eee;
+			.archive-link {
+				text-align: center;
+				margin-top: 1.5rem;
 			}
-			.post-list li:hover {
-				transform: translateX(5px);
-				box-shadow: 0 4px 8px rgba(0,0,0,0.05);
-				border-color: #ffc6c7;
-			}
-			.post-list a {
-				text-decoration: none;
-				color: #333;
-				display: flex;
-				align-items: center;
-				padding: 1rem;
-				gap: 1.5rem;
-			}
-			.post-thumbnail {
-				width: 120px;
-				height: 80px;
-				object-fit: cover;
-				border-radius: 8px;
-			}
-			.post-content {
-				display: flex;
-				flex-direction: column;
-				gap: 0.4rem;
-				flex-grow: 1;
-			}
-			.post-title {
-				font-size: 1.1em;
+			.archive-link a {
+				display: inline-block;
+				padding: 0.6rem 1.6rem;
+				background: #fff0f1;
+				border-radius: 20px;
+				color: #ff9a9e;
 				font-weight: bold;
-				color: #333;
-				line-height: 1.3;
+				text-decoration: none;
+				transition: all 0.2s;
 			}
-			.post-date {
-				color: #999;
-				font-size: 0.9em;
+			.archive-link a:hover {
+				color: #ff7479;
+				background: #ffe3e5;
 			}
 			@media (max-width: 720px) {
-				.post-list a {
+				.section-title {
 					flex-direction: column;
 					align-items: flex-start;
-					gap: 1rem;
-				}
-				.post-thumbnail {
-					width: 100%;
-					height: auto;
-					aspect-ratio: 16/9;
+					gap: 0.6rem;
 				}
 			}
 		</style>
@@ -165,140 +164,35 @@ const resolveImage = (imagePath: string | undefined) => {
 			<section class="category-section">
 				<div class="section-title">
 					<h2>✨ 最近の記事</h2>
+					<a href="/archive/">📚 全記事アーカイブ ❯</a>
 				</div>
 				<ul class="post-list">
 					{recentPosts.map((post) => (
-						<li>
-							<a href={`/blog/${post.id}/`}>
-								{post.data.heroImage ? (
-									<img class="post-thumbnail" src={resolveImage(post.data.heroImage)} alt="" />
-								) : (
-									<div class="post-thumbnail" style="background:#eee;"></div>
-								)}
-								<div class="post-content">
-									<span class="post-title">{post.data.title}</span>
-									<span class="post-date">
-										<FormattedDate date={post.data.pubDate} />
-									</span>
-								</div>
-							</a>
-						</li>
+						<PostListItem post={post} showCategory={true} />
 					))}
 				</ul>
 			</section>
 
-			{animePosts.length > 0 && (
-			<section class="category-section anime">
-				<div class="section-title">
-					<h2>📺 アニメ</h2>
-					<a href={`/category/anime`}>もっと見る ❯</a>
-				</div>
-				<ul class="post-list">
-					{animePosts.map((post) => (
-						<li>
-							<a href={`/blog/${post.id}/`}>
-								{post.data.heroImage ? (
-									<img class="post-thumbnail" src={resolveImage(post.data.heroImage)} alt="" />
-								) : (
-									<div class="post-thumbnail" style="background:#eee;"></div>
-								)}
-								<div class="post-content">
-									<span class="post-title">{post.data.title}</span>
-									<span class="post-date">
-										<FormattedDate date={post.data.pubDate} />
-									</span>
-								</div>
-							</a>
-						</li>
-					))}
-				</ul>
-			</section>
-			)}
-
-			{investmentPosts.length > 0 && (
-			<section class="category-section investment">
-				<div class="section-title">
-					<h2>📈 投資</h2>
-					<a href={`/category/investment`}>もっと見る ❯</a>
-				</div>
-				<ul class="post-list">
-					{investmentPosts.map((post) => (
-						<li>
-							<a href={`/blog/${post.id}/`}>
-								{post.data.heroImage ? (
-									<img class="post-thumbnail" src={resolveImage(post.data.heroImage)} alt="" />
-								) : (
-									<div class="post-thumbnail" style="background:#eee;"></div>
-								)}
-								<div class="post-content">
-									<span class="post-title">{post.data.title}</span>
-									<span class="post-date">
-										<FormattedDate date={post.data.pubDate} />
-									</span>
-								</div>
-							</a>
-						</li>
-					))}
-				</ul>
-			</section>
-			)}
-
-			{dailyPosts.length > 0 && (
-			<section class="category-section daily">
-				<div class="section-title">
-					<h2>☕ 日常</h2>
-					<a href={`/category/daily`}>もっと見る ❯</a>
-				</div>
-				<ul class="post-list">
-					{dailyPosts.map((post) => (
-						<li>
-							<a href={`/blog/${post.id}/`}>
-								{post.data.heroImage ? (
-									<img class="post-thumbnail" src={resolveImage(post.data.heroImage)} alt="" />
-								) : (
-									<div class="post-thumbnail" style="background:#eee;"></div>
-								)}
-								<div class="post-content">
-									<span class="post-title">{post.data.title}</span>
-									<span class="post-date">
-										<FormattedDate date={post.data.pubDate} />
-									</span>
-								</div>
-							</a>
-						</li>
-					))}
-				</ul>
-			</section>
-			)}
-
-			{gamePosts.length > 0 && (
-			<section class="category-section game">
-				<div class="section-title">
-					<h2>🎮 ゲーム</h2>
-					<a href={`/category/game`}>もっと見る ❯</a>
-				</div>
-				<ul class="post-list">
-					{gamePosts.map((post) => (
-						<li>
-							<a href={`/blog/${post.id}/`}>
-								{post.data.heroImage ? (
-									<img class="post-thumbnail" src={resolveImage(post.data.heroImage)} alt="" />
-								) : (
-									<div class="post-thumbnail" style="background:#eee;"></div>
-								)}
-								<div class="post-content">
-									<span class="post-title">{post.data.title}</span>
-									<span class="post-date">
-										<FormattedDate date={post.data.pubDate} />
-									</span>
-								</div>
-							</a>
-						</li>
-					))}
-				</ul>
-			</section>
-			)}
-
+			{sections.map((sec) => sec.posts.length > 0 && (
+				<section class="category-section" style={`border-color: ${sec.color}`}>
+					<div class="section-title">
+						<h2>{sec.emoji} {sec.label} <span class="count">({sec.total}件)</span></h2>
+						<a href={`/category/${sec.slug}/`}>もっと見る ❯</a>
+					</div>
+					{sec.subs.length > 0 && (
+						<div class="sub-chips">
+							{sec.subs.map((s) => (
+								<a href={`/category/${sec.slug}/${s.data.slug}/`}>{s.data.label}</a>
+							))}
+						</div>
+					)}
+					<ul class="post-list">
+						{sec.posts.map((post) => (
+							<PostListItem post={post} />
+						))}
+					</ul>
+				</section>
+			))}
 		</main>
 		<Footer />
 	</body>

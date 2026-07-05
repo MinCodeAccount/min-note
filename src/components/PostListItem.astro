@@ -1,0 +1,121 @@
+---
+// 記事リストの1行（サムネイル + タイトル + 日付）。
+// トップ・記事一覧・アーカイブで共通利用する。
+import type { CollectionEntry } from 'astro:content';
+import FormattedDate from './FormattedDate.astro';
+import ChangeBadge from './ChangeBadge.astro';
+import { getCategory } from '../consts';
+
+type Props = {
+	post: CollectionEntry<'blog'>;
+	// カテゴリバッジを表示するか（カテゴリ横断の一覧で使う）
+	showCategory?: boolean;
+};
+
+const { post, showCategory = false } = Astro.props;
+const cat = getCategory(post.data.category);
+const heroImage = post.data.heroImage;
+const src = heroImage ? (heroImage.startsWith('/') ? heroImage : `/${heroImage}`) : undefined;
+---
+
+<li class="post-item">
+	<a href={`/blog/${post.id}/`}>
+		{src ? (
+			<img class="post-thumbnail" src={src} alt={post.data.title} loading="lazy" width="120" height="80" />
+		) : (
+			<div class="post-thumbnail post-thumbnail-fallback" aria-hidden="true">{cat?.emoji ?? '📝'}</div>
+		)}
+		<div class="post-content">
+			<span class="post-title">{post.data.title}</span>
+			<span class="post-meta">
+				<FormattedDate date={post.data.pubDate} />
+				{post.data.change && <ChangeBadge change={post.data.change} />}
+				{showCategory && cat && (
+					<span class="post-category" style={`background: ${cat.color}55; border-color: ${cat.color}`}>
+						{cat.emoji} {cat.label}
+					</span>
+				)}
+			</span>
+		</div>
+	</a>
+</li>
+
+<style>
+	.post-item {
+		background: #fff;
+		border-radius: 10px;
+		border: 1px solid #eee;
+		transition: all 0.2s;
+		list-style: none;
+	}
+	.post-item:hover {
+		transform: translateX(5px);
+		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+		border-color: #ffc6c7;
+	}
+	.post-item a {
+		text-decoration: none;
+		color: #333;
+		display: flex;
+		align-items: center;
+		padding: 1rem;
+		gap: 1.5rem;
+	}
+	.post-thumbnail {
+		width: 120px;
+		height: 80px;
+		object-fit: cover;
+		border-radius: 8px;
+		flex-shrink: 0;
+	}
+	.post-thumbnail-fallback {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 2em;
+		background: linear-gradient(135deg, var(--cream) 0%, #fff 100%);
+		border: 2px dashed var(--cyan);
+	}
+	.post-content {
+		display: flex;
+		flex-direction: column;
+		gap: 0.4rem;
+		flex-grow: 1;
+		min-width: 0;
+	}
+	.post-title {
+		font-size: 1.1em;
+		font-weight: bold;
+		color: #333;
+		line-height: 1.4;
+	}
+	.post-meta {
+		color: #999;
+		font-size: 0.9em;
+		display: flex;
+		align-items: center;
+		gap: 0.6rem;
+		flex-wrap: wrap;
+	}
+	.post-category {
+		display: inline-block;
+		padding: 0.05rem 0.7rem;
+		border: 1px solid;
+		border-radius: 999px;
+		font-size: 0.85em;
+		color: #555;
+		white-space: nowrap;
+	}
+	@media (max-width: 720px) {
+		.post-item a {
+			flex-direction: column;
+			align-items: flex-start;
+			gap: 1rem;
+		}
+		.post-thumbnail {
+			width: 100%;
+			height: auto;
+			aspect-ratio: 16/9;
+		}
+	}
+</style>

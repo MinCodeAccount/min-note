@@ -3,18 +3,36 @@ import { type CollectionEntry, getCollection, render } from 'astro:content';
 import BlogPost from '../../layouts/BlogPost.astro';
 
 export async function getStaticPaths() {
-	const posts = await getCollection('blog', ({ data }) => data.draft !== true);
-	return posts.map((post) => ({
-		params: { slug: post.id },
-		props: post,
-	}));
+	const posts = (await getCollection('blog', ({ data }) => data.draft !== true)).sort(
+		(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+	);
+	return posts.map((post) => {
+		// 前後記事は同カテゴリ内で辿る（投資の日次レポートを連続で読めるように）。
+		// カテゴリ未設定の記事は全記事の時系列で辿る。
+		const series = post.data.category
+			? posts.filter((p) => p.data.category === post.data.category)
+			: posts;
+		const idx = series.findIndex((p) => p.id === post.id);
+		const newer = idx > 0 ? series[idx - 1] : null;
+		const older = idx >= 0 && idx < series.length - 1 ? series[idx + 1] : null;
+		return {
+			params: { slug: post.id },
+			props: {
+				post,
+				prevPost: older ? { id: older.id, title: older.data.title } : null,
+				nextPost: newer ? { id: newer.id, title: newer.data.title } : null,
+			},
+		};
+	});
 }
-type Props = CollectionEntry<'blog'>;
 
-const post = Astro.props;
+type PostLink = { id: string; title: string } | null;
+type Props = { post: CollectionEntry<'blog'>; prevPost: PostLink; nextPost: PostLink };
+
+const { post, prevPost, nextPost } = Astro.props;
 const { Content, headings } = await render(post);
 ---
 
-<BlogPost {...post.data} headings={headings}>
+<BlogPost {...post.data} headings={headings} prevPost={prevPost} nextPost={nextPost}>
 	<Content />
 </BlogPost>

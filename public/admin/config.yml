@@ -23,6 +23,45 @@ collections:
       - { label: "公開日", name: "pubDate", widget: "datetime", date_format: "YYYY-MM-DD", time_format: "HH:mm:ss.SSS[Z]", picker_utc: true }
       - { label: "ヒーロー画像", name: "heroImage", widget: "image", required: false }
       - { label: "カテゴリ", name: "category", widget: "select", options: ["anime", "investment", "daily", "game"], default: "daily" }
+      # サブカテゴリ（第2カテゴリ）。選択肢は「サブカテゴリ管理」コレクションから自動で読み込まれる
+      - label: "サブカテゴリ (任意)"
+        name: "subcategory"
+        widget: "relation"
+        collection: "subcategories"
+        value_field: "slug"
+        search_fields: ["label", "slug", "category"]
+        display_fields: ["{{category}} › {{label}}"]
+        required: false
       - { label: "騰落率 (投資用・任意 例: -1.16%)", name: "change", widget: "string", required: false }
       - { label: "下書き (ONの間はサイトに公開されません)", name: "draft", widget: "boolean", default: false, required: false }
       - { label: "本文", name: "body", widget: "markdown" }
+
+  # サブカテゴリ（第2カテゴリ）の管理。ここで追加・編集・削除すると
+  # 記事編集画面の「サブカテゴリ」選択肢とサイトの一覧ページに反映されます。
+  - name: "subcategories"
+    label: "サブカテゴリ管理"
+    folder: "src/data/subcategories"
+    create: true
+    extension: "yml"
+    format: "yml"
+    slug: "{{fields.category}}-{{fields.slug}}"
+    identifier_field: "label"
+    summary: "{{category}} › {{label}}"
+    editor:
+      preview: false
+    fields:
+      - label: "親カテゴリ"
+        name: "category"
+        widget: "select"
+        options:
+          - { label: "アニメ", value: "anime" }
+          - { label: "投資", value: "investment" }
+          - { label: "日常", value: "daily" }
+          - { label: "ゲーム", value: "game" }
+      - label: "スラッグ (URL用・半角小文字英数とハイフン)"
+        name: "slug"
+        widget: "string"
+        pattern: ["^[a-z0-9-]+$", "半角小文字英数字とハイフンのみで入力してください"]
+        hint: "例: tensura → URL は /category/anime/tensura になります。作成後の変更は非推奨（URLが変わります）"
+      - { label: "表示名", name: "label", widget: "string", hint: "例: 転スラ" }
+      - { label: "並び順 (小さいほど上に表示)", name: "order", widget: "number", default: 10, value_type: "int", required: false }

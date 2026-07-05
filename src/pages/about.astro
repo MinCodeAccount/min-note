@@ -1,25 +1,69 @@
 ---
-import Layout from '../layouts/BlogPost.astro';
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import { SITE_TITLE } from '../consts';
+
+const description = 'みんの自己紹介。投資・ゲーム・アニメが好きな凡人サラリーマンのブログです。';
 ---
 
-<Layout
-	title="私について"
-	description="みんの自己紹介。投資・ゲーム・アニメが好きな凡人サラリーマンのブログです。"
-	pubDate={new Date('2026-02-28')}
->
-	<p>
-		みんです。投資とゲームとアニメが好きな凡人サラリーマンです。
-	</p>
-	<p>
-		ゲームは任天堂のソフトやマイクラ、スマホゲームではまおりゅうをプレイしています。
-	</p>
-	<p>
-		アニメは全般的に好きで、特に好きなのは転スラです
-		イベントにも行き、グッズも気づいたら集まってます。
-		おかげで金欠ですｗ
-	</p>
-	<p>
-		投資は2022年から始めて、現在は個別銘柄と投資信託を中心に運用しています。
-	</p>
-
-</Layout>
+<!doctype html>
+<html lang="ja">
+	<head>
+		<BaseHead title={`私について - ${SITE_TITLE}`} description={description} />
+		<style>
+			main {
+				width: 720px;
+				max-width: calc(100% - 2em);
+				margin: 0 auto;
+				padding: 2rem 1em 3rem;
+				font-family: var(--font-jp);
+			}
+			.profile-header {
+				text-align: center;
+				margin-bottom: 2.5rem;
+				padding: 2rem;
+				background: linear-gradient(135deg, #fff3b0 0%, #fff 100%);
+				border-radius: 15px;
+				border: 2px dashed #ffe45e;
+			}
+			.profile-header h1 {
+				margin: 0;
+				color: #555;
+				font-size: 2em;
+			}
+			.profile-body {
+				background: #fff;
+				padding: 2rem;
+				border-radius: 15px;
+				border: 2px solid #eee;
+				color: rgb(var(--gray-dark));
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main>
+			<section class="profile-header">
+				<h1>🙋‍♀️ 私について</h1>
+			</section>
+			<section class="profile-body">
+				<p>
+					みんです。投資とゲームとアニメが好きな凡人サラリーマンです。
+				</p>
+				<p>
+					ゲームは任天堂のソフトやマイクラ、スマホゲームではまおりゅうをプレイしています。
+				</p>
+				<p>
+					アニメは全般的に好きで、特に好きなのは転スラです
+					イベントにも行き、グッズも気づいたら集まってます。
+					おかげで金欠ですｗ
+				</p>
+				<p>
+					投資は2022年から始めて、現在は個別銘柄と投資信託を中心に運用しています。
+				</p>
+			</section>
+		</main>
+		<Footer />
+	</body>
+</html>

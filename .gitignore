@@ -23,8 +23,9 @@ pnpm-debug.log*
 # jetbrains setting folder
 .idea/
 
-# TinaCMS generated files
-tina/__generated__/
+# ローカルビルドログ（コミットしない）
+*.log
+build*.txt
 
 # 投資記事の元PDF（AI自動投稿の入力。PDFはコミットしない）
 pdf-inbox/*.pdf

@@ -1,20 +1,21 @@
-﻿---
+---
 import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
-import FormattedDate from '../components/FormattedDate.astro';
-import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
+import PostListItem from '../components/PostListItem.astro';
+import { SITE_DESCRIPTION, SITE_TITLE, CATEGORIES } from '../consts';
 import { getCollection } from 'astro:content';
 
-const posts = (await getCollection('blog', ({ data }) => data.draft !== true)).sort(
+const allPosts = (await getCollection('blog', ({ data }) => data.draft !== true)).sort(
 	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
-).slice(0, 3);
+);
+const posts = allPosts.slice(0, 3);
 
-const resolveImage = (imagePath: string | undefined) => {
-	if (!imagePath) return undefined;
-	const base = '';
-	return imagePath.startsWith('/') ? `${base}${imagePath}` : `${base}/${imagePath}`;
-};
+// カテゴリごとの記事数（0件のカテゴリもリンクは表示する）
+const categoryStats = CATEGORIES.map((c) => ({
+	...c,
+	count: allPosts.filter((p) => p.data.category === c.slug).length,
+}));
 ---
 
 <!doctype html>
@@ -29,7 +30,7 @@ const resolveImage = (imagePath: string | undefined) => {
 				max-width: 800px;
 				margin: 0 auto;
 				padding: 2rem;
-				font-family: 'Hiragino Maru Gothic ProN', 'Rounded M+ 1c', 'Zen Maru Gothic', 'Meiryo', sans-serif;
+				font-family: var(--font-jp);
 			}
 			.hero {
 				background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);
@@ -59,7 +60,7 @@ const resolveImage = (imagePath: string | undefined) => {
 				text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
 				opacity: 0.95;
 			}
-			
+
 			.features {
 				display: grid;
 				grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -96,7 +97,7 @@ const resolveImage = (imagePath: string | undefined) => {
 				box-shadow: 0 8px 15px rgba(255, 243, 176, 0.5);
 				border-color: #ffe45e;
 			}
-			
+
 			.category-list {
 				list-style: none;
 				padding: 0;
@@ -106,7 +107,9 @@ const resolveImage = (imagePath: string | undefined) => {
 				gap: 0.8rem;
 			}
 			.category-list li a {
-				display: block;
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
 				background: #f4fdff;
 				padding: 0.8rem;
 				border-radius: 10px;
@@ -122,7 +125,12 @@ const resolveImage = (imagePath: string | undefined) => {
 				transform: translateX(5px);
 				box-shadow: 0 4px 8px rgba(139, 224, 232, 0.3);
 			}
-			
+			.category-list .cat-count {
+				color: #999;
+				font-weight: normal;
+				font-size: 0.9em;
+			}
+
 			.recent-posts {
 				background: #fdfbf7;
 				padding: 2rem;
@@ -139,63 +147,33 @@ const resolveImage = (imagePath: string | undefined) => {
 				list-style: none;
 				padding: 0;
 				margin: 0;
-			}
-			.post-list li {
-				margin-bottom: 1rem;
-				background: #fff;
-				border-radius: 10px;
-				box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-				transition: all 0.2s;
-			}
-			.post-list li:hover {
-				transform: translateX(5px);
-				box-shadow: 0 6px 10px rgba(0,0,0,0.1);
-			}
-			.post-list a {
-				text-decoration: none;
-				color: #333;
-				display: flex;
-				align-items: center;
-				font-weight: bold;
-				padding: 1rem;
-				gap: 1.5rem;
-			}
-			.post-thumbnail {
-				width: 100px;
-				height: 70px;
-				object-fit: cover;
-				border-radius: 8px;
-			}
-			.post-content {
 				display: flex;
 				flex-direction: column;
-				gap: 0.3rem;
-				flex-grow: 1;
+				gap: 1rem;
 			}
-			.post-title {
-				font-size: 1.1em;
+			.archive-link {
+				text-align: center;
+				margin-top: 1.5rem;
+			}
+			.archive-link a {
+				display: inline-block;
+				padding: 0.6rem 1.6rem;
+				background: #fff0f1;
+				border-radius: 20px;
+				color: #ff9a9e;
 				font-weight: bold;
-				color: #333;
+				text-decoration: none;
+				transition: all 0.2s;
 			}
-			.post-date {
-				color: #999;
-				font-size: 0.9em;
-				font-weight: normal;
+			.archive-link a:hover {
+				color: #ff7479;
+				background: #ffe3e5;
 			}
-            @media (max-width: 720px) {
-                .post-list a {
-                    flex-direction: column;
-                    align-items: flex-start;
-                    gap: 1rem;
-                }
-				.post-thumbnail {
-					width: 100%;
-					height: auto;
+			@media (max-width: 720px) {
+				.hero h1 {
+					font-size: 2em;
 				}
-                .hero h1 {
-                    font-size: 2em;
-                }
-            }
+			}
 		</style>
 	</head>
 	<body>
@@ -210,10 +188,14 @@ const resolveImage = (imagePath: string | undefined) => {
 				<div class="card blog-card">
 					<h2>📝 ブログカテゴリ</h2>
 					<ul class="category-list">
-						<li><a href={`/category/anime`}>📺 アニメ</a></li>
-						<li><a href={`/category/investment`}>📈 投資</a></li>
-						<li><a href={`/category/daily`}>☕ 日常</a></li>
-						<li><a href={`/category/game`}>🎮 ゲーム</a></li>
+						{categoryStats.map((c) => (
+							<li>
+								<a href={`/category/${c.slug}/`}>
+									<span>{c.emoji} {c.label}</span>
+									<span class="cat-count">{c.count}件</span>
+								</a>
+							</li>
+						))}
 					</ul>
 				</div>
 				<a href={`/about`} class="card yellow">
@@ -225,26 +207,13 @@ const resolveImage = (imagePath: string | undefined) => {
 			<section class="recent-posts">
 				<h2>✨ 最近の更新 ✨</h2>
 				<ul class="post-list">
-					{
-						posts.map((post) => (
-							<li>
-								<a href={`/blog/${post.id}/`}>
-									{post.data.heroImage ? (
-										<img class="post-thumbnail" src={resolveImage(post.data.heroImage)} alt="" />
-									) : (
-										<div class="post-thumbnail" style="background:#eee;"></div>
-									)}
-									<div class="post-content">
-										<span class="post-title">{post.data.title}</span>
-										<span class="post-date">
-											<FormattedDate date={post.data.pubDate} />
-										</span>
-									</div>
-								</a>
-							</li>
-						))
-					}
+					{posts.map((post) => (
+						<PostListItem post={post} showCategory={true} />
+					))}
 				</ul>
+				<div class="archive-link">
+					<a href="/archive/">📚 すべての記事を見る ❯</a>
+				</div>
 			</section>
 		</main>
 		<Footer />

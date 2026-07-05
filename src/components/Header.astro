@@ -1,5 +1,5 @@
 ---
-import { SITE_TITLE } from '../consts';
+import { SITE_TITLE, CATEGORIES } from '../consts';
 import HeaderLink from './HeaderLink.astro';
 ---
 
@@ -9,10 +9,14 @@ import HeaderLink from './HeaderLink.astro';
 		<div class="internal-links">
 			<HeaderLink href="/">ホーム</HeaderLink>
 			<HeaderLink href="/blog/">ブログ</HeaderLink>
+			{CATEGORIES.map((c) => (
+				<HeaderLink href={`/category/${c.slug}/`}>{c.emoji} {c.label}</HeaderLink>
+			))}
+			<HeaderLink href="/search/">🔍 検索</HeaderLink>
 			<HeaderLink href="/about/">プロフィール</HeaderLink>
 		</div>
 		<div class="social-links">
-			<a href="https://x.com/mikan56230" target="_blank">
+			<a href="https://x.com/mikan56230" target="_blank" rel="noopener">
 				<span class="sr-only">Follow on X</span>
 				<svg viewBox="0 0 16 16" aria-hidden="true" width="32" height="32"
 					><path
@@ -34,6 +38,7 @@ import HeaderLink from './HeaderLink.astro';
 	h2 {
 		margin: 0;
 		font-size: 1em;
+		white-space: nowrap;
 	}
 
 	h2 a,
@@ -43,13 +48,20 @@ import HeaderLink from './HeaderLink.astro';
 	nav {
 		display: flex;
 		align-items: center;
-		gap: 2em;
+		gap: 1.5em;
+	}
+	.internal-links {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		column-gap: 0.2em;
 	}
 	nav a {
 		padding: 1em 0.5em;
 		color: var(--black);
 		border-bottom: 4px solid transparent;
 		text-decoration: none;
+		white-space: nowrap;
 	}
 	nav a.active {
 		text-decoration: none;
@@ -62,9 +74,28 @@ import HeaderLink from './HeaderLink.astro';
 	.social-links {
 		margin-left: auto;
 	}
-	@media (max-width: 720px) {
+	@media (max-width: 960px) {
 		.social-links {
 			display: none;
+		}
+		nav {
+			flex-wrap: wrap;
+			gap: 0;
+			padding-bottom: 0.3em;
+		}
+		nav a {
+			padding: 0.5em 0.4em;
+			font-size: 0.9em;
+			border-bottom-width: 3px;
+		}
+		h2 {
+			width: 100%;
+			text-align: center;
+			padding: 0.8em 0 0.3em;
+		}
+		.internal-links {
+			width: 100%;
+			justify-content: center;
 		}
 	}
 </style>

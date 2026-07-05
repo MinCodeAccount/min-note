@@ -1,8 +1,23 @@
 ---
+import { CATEGORIES } from '../consts';
 const today = new Date();
 ---
 
 <footer>
+	<nav class="footer-nav" aria-label="フッターナビゲーション">
+		<div class="footer-links">
+			<a href="/">ホーム</a>
+			<a href="/blog/">ブログ</a>
+			<a href="/archive/">📚 アーカイブ</a>
+			<a href="/search/">🔍 検索</a>
+			<a href="/about/">プロフィール</a>
+		</div>
+		<div class="footer-links">
+			{CATEGORIES.map((c) => (
+				<a href={`/category/${c.slug}/`}>{c.emoji} {c.label}</a>
+			))}
+		</div>
+	</nav>
 	<p class="copyright">&copy; {today.getFullYear()} みん. All rights reserved.</p>
 	<div class="social-links">
 		<a href="https://x.com/mikan56230" target="_blank" rel="noopener">
@@ -31,6 +46,26 @@ const today = new Date();
 		background: linear-gradient(var(--gray-gradient)) no-repeat;
 		color: rgb(var(--gray));
 		text-align: center;
+	}
+	.footer-nav {
+		margin-bottom: 1.5em;
+		font-family: var(--font-jp);
+	}
+	.footer-links {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		gap: 0.4em 1.4em;
+		margin-bottom: 0.6em;
+	}
+	.footer-links a {
+		color: rgb(var(--gray));
+		text-decoration: none;
+		font-size: 0.9em;
+	}
+	.footer-links a:hover {
+		color: var(--accent);
+		text-decoration: underline;
 	}
 	.copyright {
 		margin: 0 0 0.5em 0;

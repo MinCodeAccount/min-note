@@ -5,14 +5,13 @@ import Footer from '../../components/Footer.astro';
 import FormattedDate from '../../components/FormattedDate.astro';
 import Header from '../../components/Header.astro';
 import ChangeBadge from '../../components/ChangeBadge.astro';
-import { SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
+import { SITE_DESCRIPTION, SITE_TITLE, CATEGORIES, categoryLabel } from '../../consts';
 
 export async function getStaticPaths() {
 	const posts = await getCollection('blog', ({ data }) => data.draft !== true);
-	const predefinedCategories = ['anime', 'investment', 'daily', 'game'];
 	const uniqueCategories = [
 		...new Set([
-			...predefinedCategories,
+			...CATEGORIES.map((c) => c.slug),
 			...posts.map((post) => post.data.category).filter(Boolean)
 		]),
 	];
@@ -31,13 +30,25 @@ const { posts } = Astro.props;
 
 posts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 
-const categoryNames: Record<string, string> = {
-	anime: '📺 アニメ',
-	investment: '📈 投資',
-	daily: '☕ 日常',
-	game: '🎮 ゲーム'
-};
-const categoryTitle = (category && categoryNames[category]) || category;
+const categoryTitle = categoryLabel(category);
+
+// このカテゴリのサブカテゴリ定義（/admin/ の「サブカテゴリ管理」で編集可能）
+const subs = (await getCollection('subcategories'))
+	.filter((s) => s.data.category === category)
+	.sort((a, b) => (a.data.order - b.data.order) || a.data.label.localeCompare(b.data.label, 'ja'));
+const subSlugs = new Set(subs.map((s) => s.data.slug));
+
+const groups = subs.map((s) => ({
+	slug: s.data.slug,
+	label: s.data.label,
+	posts: posts.filter((p) => p.data.subcategory === s.data.slug),
+}));
+// サブカテゴリ未設定（または定義に無い値）の記事は「その他」へ
+const otherPosts = posts.filter((p) => !p.data.subcategory || !subSlugs.has(p.data.subcategory));
+
+// 投資カテゴリは日次記事が多いのでコンパクトなリスト表示
+const isCompact = category === 'investment';
+const SECTION_LIMIT = isCompact ? 10 : 6;
 
 const resolveImage = (imagePath: string | undefined) => {
 	if (!imagePath) return undefined;
@@ -58,9 +69,22 @@ const resolveImage = (imagePath: string | undefined) => {
 				padding: 2rem;
 				font-family: var(--font-jp);
 			}
+			.breadcrumb {
+				font-size: 0.9em;
+				margin-bottom: 1rem;
+				color: rgb(var(--gray));
+			}
+			.breadcrumb a {
+				color: rgb(var(--gray));
+				text-decoration: none;
+			}
+			.breadcrumb a:hover {
+				color: var(--accent);
+				text-decoration: underline;
+			}
 			.category-header {
 				text-align: center;
-				margin-bottom: 3rem;
+				margin-bottom: 2rem;
 				padding: 2rem;
 				background: linear-gradient(135deg, #fdfbf7 0%, #fff 100%);
 				border-radius: 15px;
@@ -69,6 +93,77 @@ const resolveImage = (imagePath: string | undefined) => {
 			.category-header h1 {
 				margin: 0;
 				color: #555;
+			}
+			.category-header .count {
+				color: #999;
+				font-size: 0.95em;
+			}
+			/* サブカテゴリのチップ（絞り込みナビ） */
+			.sub-chips {
+				display: flex;
+				flex-wrap: wrap;
+				justify-content: center;
+				gap: 0.6rem;
+				margin: 0 0 2.5rem 0;
+				padding: 0;
+				list-style: none;
+			}
+			.sub-chips a {
+				display: inline-block;
+				padding: 0.4rem 1rem;
+				background: #f4fdff;
+				border: 2px solid var(--cyan);
+				border-radius: 999px;
+				color: #333;
+				font-weight: bold;
+				font-size: 0.9em;
+				text-decoration: none;
+				transition: all 0.2s;
+			}
+			.sub-chips a:hover {
+				background: #fff;
+				border-color: var(--cyan-deep);
+				box-shadow: 0 4px 8px rgba(139, 224, 232, 0.3);
+			}
+			.sub-chips .chip-count {
+				color: #999;
+				font-weight: normal;
+			}
+			.sub-section {
+				margin-bottom: 3rem;
+			}
+			.sub-section-title {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				border-bottom: 2px dashed #eee;
+				padding-bottom: 0.8rem;
+				margin-bottom: 1.2rem;
+			}
+			.sub-section-title h2 {
+				margin: 0;
+				font-size: 1.5em;
+				color: #444;
+			}
+			.sub-section-title h2 .count {
+				color: #999;
+				font-size: 0.7em;
+				font-weight: normal;
+			}
+			.sub-section-title a {
+				text-decoration: none;
+				color: #ff9a9e;
+				font-weight: bold;
+				white-space: nowrap;
+				padding: 0.4rem 1rem;
+				background: #fff0f1;
+				border-radius: 20px;
+				font-size: 0.9em;
+				transition: all 0.2s;
+			}
+			.sub-section-title a:hover {
+				color: #ff7479;
+				background: #ffe3e5;
 			}
 			.empty-message {
 				text-align: center;
@@ -96,20 +191,20 @@ const resolveImage = (imagePath: string | undefined) => {
 				text-decoration: none;
 				transition: 0.2s ease;
 			}
-			ul.cards li:first-child {
-				width: 100%;
-				margin-bottom: 1rem;
-				text-align: center;
-			}
-			ul.cards li:first-child img {
-				width: 100%;
-			}
-			ul.cards li:first-child .title {
-				font-size: 2.369rem;
-			}
-			ul.cards li img {
+			ul.cards li img,
+			ul.cards li .card-fallback {
 				margin-bottom: 0.5rem;
 				border-radius: 12px;
+			}
+			.card-fallback {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				width: 100%;
+				aspect-ratio: 2 / 1;
+				font-size: 3em;
+				background: linear-gradient(135deg, var(--cream) 0%, #fff 100%);
+				border: 2px dashed var(--cyan);
 			}
 			ul.cards li a {
 				display: block;
@@ -117,15 +212,16 @@ const resolveImage = (imagePath: string | undefined) => {
 			.title {
 				margin: 0;
 				color: rgb(var(--black));
-				line-height: 1;
+				line-height: 1.3;
+				font-size: 1.15em;
 			}
 			.date {
 				margin: 0;
 				color: rgb(var(--gray));
 			}
-			ul.cards li a:hover h4,
+			ul.cards li a:hover .title,
 			ul.cards li a:hover .date {
-				color: rgb(var(--accent));
+				color: var(--accent);
 			}
 			ul.cards a:hover img {
 				box-shadow: var(--box-shadow);
@@ -172,17 +268,11 @@ const resolveImage = (imagePath: string | undefined) => {
 			}
 			@media (max-width: 720px) {
 				ul.cards {
-					gap: 0.5em;
+					gap: 1rem;
 				}
 				ul.cards li {
 					width: 100%;
 					text-align: center;
-				}
-				ul.cards li:first-child {
-					margin-bottom: 0;
-				}
-				ul.cards li:first-child .title {
-					font-size: 1.563em;
 				}
 				.market-list a {
 					flex-wrap: wrap;
@@ -190,22 +280,43 @@ const resolveImage = (imagePath: string | undefined) => {
 				.market-list .m-title {
 					width: 100%;
 				}
+				.sub-section-title {
+					flex-direction: column;
+					align-items: flex-start;
+					gap: 0.5rem;
+				}
 			}
 		</style>
 	</head>
 	<body>
 		<Header />
 		<main>
+			<nav class="breadcrumb" aria-label="パンくずリスト">
+				<a href="/">ホーム</a> › <span>{categoryTitle}</span>
+			</nav>
 			<section class="category-header">
 				<h1>{categoryTitle} の記事一覧</h1>
-				<p>このテーマに関する投稿です！</p>
+				<p class="count">全 {posts.length} 件</p>
 			</section>
-			<section>
-				{posts.length === 0 ? (
-					<div class="empty-message">
-						<p>🙇‍♀️<br>現在、このカテゴリの記事はまだありません…<br>今後の更新を楽しみにお待ちください！</p>
-					</div>
-				) : category === 'investment' ? (
+
+			{subs.length > 0 && (
+				<ul class="sub-chips">
+					{groups.map((g) => (
+						<li>
+							<a href={`/category/${category}/${g.slug}/`}>
+								{g.label} <span class="chip-count">({g.posts.length})</span>
+							</a>
+						</li>
+					))}
+				</ul>
+			)}
+
+			{posts.length === 0 ? (
+				<div class="empty-message">
+					<p>🙇‍♀️<br>現在、このカテゴリの記事はまだありません…<br>今後の更新を楽しみにお待ちください！</p>
+				</div>
+			) : subs.length === 0 ? (
+				isCompact ? (
 					<ul class="market-list">
 						{posts.map((post) => (
 							<li>
@@ -222,8 +333,10 @@ const resolveImage = (imagePath: string | undefined) => {
 						{posts.map((post) => (
 							<li>
 								<a href={`/blog/${post.id}/`}>
-									{post.data.heroImage && (
-										<img width={720} height={360} src={resolveImage(post.data.heroImage)} alt="" />
+									{post.data.heroImage ? (
+										<img width={720} height={360} src={resolveImage(post.data.heroImage)} alt={post.data.title} loading="lazy" />
+									) : (
+										<div class="card-fallback">{categoryTitle.split(' ')[0]}</div>
 									)}
 									<h4 class="title">{post.data.title}</h4>
 									<p class="date">
@@ -233,8 +346,91 @@ const resolveImage = (imagePath: string | undefined) => {
 							</li>
 						))}
 					</ul>
-				)}
-			</section>
+				)
+			) : (
+				<>
+					{groups.filter((g) => g.posts.length > 0).map((g) => (
+						<section class="sub-section">
+							<div class="sub-section-title">
+								<h2>{g.label} <span class="count">({g.posts.length}件)</span></h2>
+								{g.posts.length > SECTION_LIMIT && (
+									<a href={`/category/${category}/${g.slug}/`}>すべて見る ❯</a>
+								)}
+							</div>
+							{isCompact ? (
+								<ul class="market-list">
+									{g.posts.slice(0, SECTION_LIMIT).map((post) => (
+										<li>
+											<a href={`/blog/${post.id}/`}>
+												<span class="m-date"><FormattedDate date={post.data.pubDate} /></span>
+												{post.data.change && <ChangeBadge change={post.data.change} />}
+												<span class="m-title">{post.data.title}</span>
+											</a>
+										</li>
+									))}
+								</ul>
+							) : (
+								<ul class="cards">
+									{g.posts.slice(0, SECTION_LIMIT).map((post) => (
+										<li>
+											<a href={`/blog/${post.id}/`}>
+												{post.data.heroImage ? (
+													<img width={720} height={360} src={resolveImage(post.data.heroImage)} alt={post.data.title} loading="lazy" />
+												) : (
+													<div class="card-fallback">{categoryTitle.split(' ')[0]}</div>
+												)}
+												<h4 class="title">{post.data.title}</h4>
+												<p class="date">
+													<FormattedDate date={post.data.pubDate} />
+												</p>
+											</a>
+										</li>
+									))}
+								</ul>
+							)}
+						</section>
+					))}
+
+					{otherPosts.length > 0 && (
+						<section class="sub-section">
+							<div class="sub-section-title">
+								<h2>その他 <span class="count">({otherPosts.length}件)</span></h2>
+							</div>
+							{isCompact ? (
+								<ul class="market-list">
+									{otherPosts.map((post) => (
+										<li>
+											<a href={`/blog/${post.id}/`}>
+												<span class="m-date"><FormattedDate date={post.data.pubDate} /></span>
+												{post.data.change && <ChangeBadge change={post.data.change} />}
+												<span class="m-title">{post.data.title}</span>
+											</a>
+										</li>
+									))}
+								</ul>
+							) : (
+								<ul class="cards">
+									{otherPosts.map((post) => (
+										<li>
+											<a href={`/blog/${post.id}/`}>
+												{post.data.heroImage ? (
+													<img width={720} height={360} src={resolveImage(post.data.heroImage)} alt={post.data.title} loading="lazy" />
+												) : (
+													<div class="card-fallback">{categoryTitle.split(' ')[0]}</div>
+												)}
+												<h4 class="title">{post.data.title}</h4>
+												<p class="date">
+													<FormattedDate date={post.data.pubDate} />
+												</p>
+											</a>
+										</li>
+									))}
+								</ul>
+							)}
+						</section>
+					)}
+				</>
+			)}
 		</main>
 		<Footer />
 	</body>

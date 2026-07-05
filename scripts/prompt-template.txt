@@ -7,7 +7,7 @@
 3. スタイルガイドの体裁に厳密に従い、記事(Markdown)を次のファイルに新規作成(Write)する: {{OUT}}
 
 厳守ルール:
-- frontmatter には必ず category: investment と draft: true を入れる。pubDate は {{DATE}} を使う。
+- frontmatter には必ず category: investment、subcategory: daily-report、draft: true を入れる。pubDate は {{DATE}} を使う。
 - PDF に書かれていない数値・ニュース・固有名詞を創作しない。PDF に無い情報は書かない。
 - チャート画像や日経記事の埋め込みは <!-- TODO: チャート画像をここに --> のようにプレースホルダで残す。
 - その日の大きな値動きは「何が起きたか」だけでなく「なぜそうなったか(要因)」を、PDF本文・識者コメント・関連記事から拾って必ず説明する。

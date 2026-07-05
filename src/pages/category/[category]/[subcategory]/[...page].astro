@@ -1,0 +1,294 @@
+---
+import type { Page } from 'astro';
+import { getCollection, type CollectionEntry } from 'astro:content';
+import BaseHead from '../../../../components/BaseHead.astro';
+import Footer from '../../../../components/Footer.astro';
+import FormattedDate from '../../../../components/FormattedDate.astro';
+import Header from '../../../../components/Header.astro';
+import ChangeBadge from '../../../../components/ChangeBadge.astro';
+import { SITE_DESCRIPTION, SITE_TITLE, categoryLabel } from '../../../../consts';
+
+export async function getStaticPaths({ paginate }) {
+	const posts = (await getCollection('blog', ({ data }) => data.draft !== true)).sort(
+		(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+	);
+	const subs = await getCollection('subcategories');
+
+	return subs.flatMap((s) => {
+		const subPosts = posts.filter(
+			(p) => p.data.category === s.data.category && p.data.subcategory === s.data.slug
+		);
+		const params = { category: s.data.category, subcategory: s.data.slug };
+		const props = { subLabel: s.data.label };
+		if (subPosts.length === 0) {
+			// 記事0件でもページ自体は生成する（チップやCMSからのリンク先を確保）
+			return [{ params: { ...params, page: undefined }, props: { ...props, page: null } }];
+		}
+		return paginate(subPosts, { params, pageSize: 20, props });
+	});
+}
+
+type Props = { page: Page<CollectionEntry<'blog'>> | null; subLabel: string };
+
+const { category, subcategory } = Astro.params;
+const { page, subLabel } = Astro.props;
+
+const categoryTitle = categoryLabel(category);
+const posts = page ? page.data : [];
+const isCompact = category === 'investment';
+
+const resolveImage = (imagePath: string | undefined) => {
+	if (!imagePath) return undefined;
+	const base = '';
+	return imagePath.startsWith('/') ? `${base}${imagePath}` : `${base}/${imagePath}`;
+};
+
+const pageSuffix = page && page.currentPage > 1 ? `（${page.currentPage}ページ目）` : '';
+---
+
+<!doctype html>
+<html lang="ja">
+	<head>
+		<BaseHead
+			title={`${subLabel}${pageSuffix} - ${categoryTitle} - ${SITE_TITLE}`}
+			description={SITE_DESCRIPTION}
+		/>
+		<style>
+			main {
+				width: 960px;
+				max-width: 100%;
+				margin: 0 auto;
+				padding: 2rem;
+				font-family: var(--font-jp);
+			}
+			.breadcrumb {
+				font-size: 0.9em;
+				margin-bottom: 1rem;
+				color: rgb(var(--gray));
+			}
+			.breadcrumb a {
+				color: rgb(var(--gray));
+				text-decoration: none;
+			}
+			.breadcrumb a:hover {
+				color: var(--accent);
+				text-decoration: underline;
+			}
+			.category-header {
+				text-align: center;
+				margin-bottom: 2.5rem;
+				padding: 2rem;
+				background: linear-gradient(135deg, #fdfbf7 0%, #fff 100%);
+				border-radius: 15px;
+				border: 2px dashed #bdf1f6;
+			}
+			.category-header h1 {
+				margin: 0;
+				color: #555;
+			}
+			.category-header .count {
+				color: #999;
+				font-size: 0.95em;
+			}
+			.empty-message {
+				text-align: center;
+				padding: 4rem 2rem;
+				background: #fdfbf7;
+				border-radius: 15px;
+				border: 2px dashed #ffc6c7;
+				color: #666;
+				font-size: 1.2em;
+				line-height: 1.8;
+				margin: 2rem 0;
+			}
+			ul.cards {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 2rem;
+				list-style-type: none;
+				margin: 0;
+				padding: 0;
+			}
+			ul.cards li {
+				width: calc(50% - 1rem);
+			}
+			ul.cards li * {
+				text-decoration: none;
+				transition: 0.2s ease;
+			}
+			ul.cards li img,
+			ul.cards li .card-fallback {
+				margin-bottom: 0.5rem;
+				border-radius: 12px;
+			}
+			.card-fallback {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				width: 100%;
+				aspect-ratio: 2 / 1;
+				font-size: 3em;
+				background: linear-gradient(135deg, var(--cream) 0%, #fff 100%);
+				border: 2px dashed var(--cyan);
+			}
+			ul.cards li a {
+				display: block;
+			}
+			.title {
+				margin: 0;
+				color: rgb(var(--black));
+				line-height: 1.3;
+				font-size: 1.15em;
+			}
+			.date {
+				margin: 0;
+				color: rgb(var(--gray));
+			}
+			ul.cards li a:hover .title,
+			ul.cards li a:hover .date {
+				color: var(--accent);
+			}
+			ul.cards a:hover img {
+				box-shadow: var(--box-shadow);
+			}
+			.market-list {
+				list-style: none;
+				padding: 0;
+				margin: 0;
+				display: flex;
+				flex-direction: column;
+				gap: 0.6rem;
+			}
+			.market-list li {
+				background: #fff;
+				border: 1px solid #eee;
+				border-radius: 10px;
+				transition: all 0.2s;
+			}
+			.market-list li:hover {
+				transform: translateX(4px);
+				box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+				border-color: var(--cyan-deep);
+			}
+			.market-list a {
+				display: flex;
+				align-items: center;
+				gap: 0.8rem;
+				padding: 0.8rem 1rem;
+				text-decoration: none;
+				color: #333;
+			}
+			.market-list .m-date {
+				color: #888;
+				font-size: 0.85em;
+				white-space: nowrap;
+				font-variant-numeric: tabular-nums;
+			}
+			.market-list .m-title {
+				flex-grow: 1;
+				font-weight: bold;
+				line-height: 1.4;
+			}
+			/* ページネーション */
+			.pagination {
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				gap: 1.5rem;
+				margin-top: 3rem;
+				font-weight: bold;
+			}
+			.pagination a {
+				text-decoration: none;
+				color: #ff9a9e;
+				padding: 0.5rem 1.2rem;
+				background: #fff0f1;
+				border-radius: 20px;
+				transition: all 0.2s;
+			}
+			.pagination a:hover {
+				color: #ff7479;
+				background: #ffe3e5;
+			}
+			.pagination .page-info {
+				color: #999;
+				font-weight: normal;
+			}
+			@media (max-width: 720px) {
+				ul.cards {
+					gap: 1rem;
+				}
+				ul.cards li {
+					width: 100%;
+					text-align: center;
+				}
+				.market-list a {
+					flex-wrap: wrap;
+				}
+				.market-list .m-title {
+					width: 100%;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main>
+			<nav class="breadcrumb" aria-label="パンくずリスト">
+				<a href="/">ホーム</a> › <a href={`/category/${category}/`}>{categoryTitle}</a> › <span>{subLabel}</span>
+			</nav>
+			<section class="category-header">
+				<h1>{categoryTitle} › {subLabel}</h1>
+				<p class="count">
+					{page ? `全 ${page.total} 件` : '全 0 件'}
+					{page && page.lastPage > 1 && ` ・ ${page.currentPage} / ${page.lastPage} ページ`}
+				</p>
+			</section>
+
+			{posts.length === 0 ? (
+				<div class="empty-message">
+					<p>🙇‍♀️<br>「{subLabel}」の記事はまだありません…<br>今後の更新を楽しみにお待ちください！</p>
+				</div>
+			) : isCompact ? (
+				<ul class="market-list">
+					{posts.map((post) => (
+						<li>
+							<a href={`/blog/${post.id}/`}>
+								<span class="m-date"><FormattedDate date={post.data.pubDate} /></span>
+								{post.data.change && <ChangeBadge change={post.data.change} />}
+								<span class="m-title">{post.data.title}</span>
+							</a>
+						</li>
+					))}
+				</ul>
+			) : (
+				<ul class="cards">
+					{posts.map((post) => (
+						<li>
+							<a href={`/blog/${post.id}/`}>
+								{post.data.heroImage ? (
+									<img width={720} height={360} src={resolveImage(post.data.heroImage)} alt={post.data.title} loading="lazy" />
+								) : (
+									<div class="card-fallback">{categoryTitle.split(' ')[0]}</div>
+								)}
+								<h4 class="title">{post.data.title}</h4>
+								<p class="date">
+									<FormattedDate date={post.data.pubDate} />
+								</p>
+							</a>
+						</li>
+					))}
+				</ul>
+			)}
+
+			{page && (page.url.prev || page.url.next) && (
+				<nav class="pagination" aria-label="ページ送り">
+					{page.url.prev && <a href={page.url.prev}>← 新しい記事</a>}
+					<span class="page-info">{page.currentPage} / {page.lastPage}</span>
+					{page.url.next && <a href={page.url.next}>古い記事 →</a>}
+				</nav>
+			)}
+		</main>
+		<Footer />
+	</body>
+</html>

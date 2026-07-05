@@ -1,0 +1,77 @@
+---
+import Search from 'astro-pagefind/components/Search.astro';
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import { SITE_TITLE } from '../consts';
+---
+
+<!doctype html>
+<html lang="ja">
+	<head>
+		<BaseHead title={`検索 - ${SITE_TITLE}`} description="サイト内の記事を全文検索できます。" />
+		<style>
+			main {
+				width: 720px;
+				max-width: calc(100% - 2em);
+				margin: 0 auto;
+				padding: 2rem 1em 3rem;
+				font-family: var(--font-jp);
+			}
+			.search-header {
+				text-align: center;
+				margin-bottom: 2rem;
+				padding: 2rem;
+				background: linear-gradient(135deg, #bdf1f6 0%, #fff 100%);
+				border-radius: 15px;
+				border: 2px dashed #8be0e8;
+			}
+			.search-header h1 {
+				margin: 0;
+				color: #555;
+				font-size: 2em;
+			}
+			.search-header p {
+				color: #777;
+				margin: 0.5rem 0 0 0;
+			}
+			.search-box {
+				background: #fff;
+				padding: 1.5rem 2rem 2rem;
+				border-radius: 15px;
+				border: 2px solid #eee;
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main>
+			<section class="search-header">
+				<h1>🔍 記事を検索</h1>
+				<p>キーワードで過去の記事を探せます（例: 転スラ、日経平均、ポケモン）</p>
+			</section>
+			<div class="search-box">
+				<Search
+					id="search"
+					className="pagefind-ui"
+					uiOptions={{
+						showImages: false,
+						pageSize: 10,
+						translations: {
+							placeholder: 'キーワードを入力…',
+							zero_results: '「[SEARCH_TERM]」に一致する記事は見つかりませんでした',
+							many_results: '「[SEARCH_TERM]」の検索結果 ([COUNT]件)',
+							one_result: '「[SEARCH_TERM]」の検索結果 ([COUNT]件)',
+							alt_search: '「[SEARCH_TERM]」の結果が少ないため「[DIFFERENT_TERM]」の結果を表示しています',
+							search_suggestion: '結果が見つかりません。別のキーワードをお試しください。',
+							searching: '「[SEARCH_TERM]」を検索中…',
+							load_more: 'さらに表示',
+							clear_search: 'クリア',
+						},
+					}}
+				/>
+			</div>
+		</main>
+		<Footer />
+	</body>
+</html>

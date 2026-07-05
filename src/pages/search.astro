@@ -1,15 +1,17 @@
 ---
-import Search from 'astro-pagefind/components/Search.astro';
 import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
 import { SITE_TITLE } from '../consts';
+// Pagefind のUI/インデックスは build 後に dist/pagefind/ に生成される
+// （dev では存在しないため、確認は build → preview で行う）
 ---
 
 <!doctype html>
 <html lang="ja">
 	<head>
 		<BaseHead title={`検索 - ${SITE_TITLE}`} description="サイト内の記事を全文検索できます。" />
+		<link rel="stylesheet" href="/pagefind/pagefind-ui.css" />
 		<style>
 			main {
 				width: 720px;
@@ -41,6 +43,14 @@ import { SITE_TITLE } from '../consts';
 				border-radius: 15px;
 				border: 2px solid #eee;
 			}
+			/* Pagefind UI をサイトのテーマ色に合わせる */
+			#search {
+				--pagefind-ui-primary: var(--accent);
+				--pagefind-ui-text: rgb(var(--gray-dark));
+				--pagefind-ui-border: rgb(var(--gray-light));
+				--pagefind-ui-border-radius: 12px;
+				--pagefind-ui-font: var(--font-jp);
+			}
 		</style>
 	</head>
 	<body>
@@ -51,27 +61,41 @@ import { SITE_TITLE } from '../consts';
 				<p>キーワードで過去の記事を探せます（例: 転スラ、日経平均、ポケモン）</p>
 			</section>
 			<div class="search-box">
-				<Search
-					id="search"
-					className="pagefind-ui"
-					uiOptions={{
-						showImages: false,
-						pageSize: 10,
-						translations: {
-							placeholder: 'キーワードを入力…',
-							zero_results: '「[SEARCH_TERM]」に一致する記事は見つかりませんでした',
-							many_results: '「[SEARCH_TERM]」の検索結果 ([COUNT]件)',
-							one_result: '「[SEARCH_TERM]」の検索結果 ([COUNT]件)',
-							alt_search: '「[SEARCH_TERM]」の結果が少ないため「[DIFFERENT_TERM]」の結果を表示しています',
-							search_suggestion: '結果が見つかりません。別のキーワードをお試しください。',
-							searching: '「[SEARCH_TERM]」を検索中…',
-							load_more: 'さらに表示',
-							clear_search: 'クリア',
-						},
-					}}
-				/>
+				<div id="search"></div>
 			</div>
 		</main>
 		<Footer />
+		<script is:inline src="/pagefind/pagefind-ui.js"></script>
+		<script is:inline>
+			window.addEventListener('DOMContentLoaded', () => {
+				if (typeof PagefindUI === 'undefined') return;
+				const ui = new PagefindUI({
+					element: '#search',
+					showImages: false,
+					showSubResults: true,
+					pageSize: 10,
+					translations: {
+						placeholder: '記事・株価を検索',
+						clear_search: 'クリア',
+						load_more: 'さらに表示',
+						search_label: 'サイト内を検索',
+						filters_label: '絞り込み',
+						zero_results: '「[SEARCH_TERM]」に一致する記事は見つかりませんでした',
+						many_results: '「[SEARCH_TERM]」の検索結果: [COUNT]件',
+						one_result: '「[SEARCH_TERM]」の検索結果: [COUNT]件',
+						alt_search: '「[SEARCH_TERM]」の結果がないため「[DIFFERENT_TERM]」の結果を表示しています',
+						search_suggestion: '「[SEARCH_TERM]」に一致する記事はありません。別のキーワードをお試しください',
+						searching: '「[SEARCH_TERM]」を検索中…',
+					},
+				});
+				// ヘッダーの検索ボックスから ?q= 付きで来たら自動で検索を実行
+				const q = new URLSearchParams(window.location.search).get('q');
+				if (q) {
+					ui.triggerSearch(q);
+					const input = document.querySelector('#search input');
+					if (input) input.focus();
+				}
+			});
+		</script>
 	</body>
 </html>
